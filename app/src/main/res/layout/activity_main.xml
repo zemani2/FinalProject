@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    tools:context=".MainActivity">
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
+        android:layout_marginTop="50dp"
+        ></EditText>
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/username"
+        android:layout_marginTop="50dp"
+        android:drawableLeft="@android:drawable/ic_lock_idle_lock"
+        android:hint="Password"
+        android:inputType="textPassword"
+        ></EditText>
+    <ToggleButton
+        android:id="@+id/toggleButtonpassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@id/password"
+        android:layout_alignBottom="@id/password"
+        android:layout_marginEnd="8dp"
+        android:background="@null"
+        android:button="@android:drawable/ic_menu_view"
+        android:textOff=" "
+        android:textOn=" " />
+    <ToggleButton
+        android:id="@+id/toggleButtonrepassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@id/repassword"
+        android:layout_alignBottom="@id/repassword"
+        android:layout_marginEnd="8dp"
+        android:background="@null"
+        android:button="@android:drawable/ic_menu_view"
+        android:textOff=" "
+        android:textOn=" " />
+    <EditText
+        android:id="@+id/repassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Retype Password"
+        android:layout_marginTop="50dp"
+        android:layout_below="@id/password"
+        android:drawableLeft="@android:drawable/ic_lock_idle_lock"
+        android:inputType="textPassword"
+        ></EditText>
+
+
+    <RelativeLayout
+        android:id="@+id/ageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/repassword"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/ageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Age:"
+            android:textSize="16sp"
+            android:layout_alignBaseline="@id/ageSpinner"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:id="@+id/ageSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/ageLabel"
+            android:layout_marginStart="8dp"
+            android:entries="@array/age_range"
+            android:spinnerMode="dropdown"
+            android:dropDownVerticalOffset="40dp"
+            android:dropDownHeight="200dp"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/weightLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ageLayout"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/weightLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Weight:"
+            android:textSize="16sp"
+            android:layout_alignBaseline="@id/weightSpinner"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:id="@+id/weightSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/weightLabel"
+            android:layout_marginStart="8dp"
+            android:entries="@array/weight_range"
+            android:spinnerMode="dropdown"
+            android:dropDownVerticalOffset="40dp"
+            android:dropDownHeight="200dp"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/heightLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/weightLayout"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/heightLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Height:"
+            android:textSize="16sp"
+            android:layout_alignBaseline="@id/heightSpinner"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:id="@+id/heightSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/heightLabel"
+            android:layout_marginStart="8dp"
+            android:entries="@array/height_range"
+            android:spinnerMode="dropdown"
+            android:dropDownVerticalOffset="40dp"
+            android:dropDownHeight="200dp"/>
+    </RelativeLayout>
+    <Button
+        android:id="@+id/signup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:layout_marginTop="50dp"
+        android:layout_below="@id/heightLayout"
+        ></Button>
+    <Button
+        android:id="@+id/signin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Existing user! go to sign in"
+        android:layout_marginTop="50dp"
+        android:layout_below="@id/signup"
+        ></Button>
+
+</RelativeLayout>

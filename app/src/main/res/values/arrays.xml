@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="age_range">
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+    </string-array>
+
+    <string-array name="height_range">
+        <item>151 cm</item>
+        <item>152 cm</item>
+        <item>153 cm</item>
+        <item>154 cm</item>
+        <item>155 cm</item>
+    </string-array>
+
+    <string-array name="weight_range">
+        <item>50 kg</item>
+        <item>60 kg</item>
+        <item>70 kg</item>
+        <item>80 kg</item>
+        <item>90 kg</item>
+    </string-array>
+</resources>
