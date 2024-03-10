@@ -9,6 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 public class LoginActivity extends AppCompatActivity {
     EditText username, password;
     Button btnlogin;
@@ -23,24 +27,22 @@ public class LoginActivity extends AppCompatActivity {
         btnlogin = (Button) findViewById(R.id.btnsignin1);
         DB = new DBHelper(this);
 
-        btnlogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        btnlogin.setOnClickListener(view -> {
 
-                String user = username.getText().toString();
-                String pass = password.getText().toString();
+            String user = username.getText().toString();
+            String pass = password.getText().toString();
 
-                if(user.equals("")||pass.equals(""))
-                    Toast.makeText(LoginActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
-                else{
-                    Boolean checkuserpass = DB.checkusernamepassword(user, pass);
-                    if(checkuserpass==true){
-                        Toast.makeText(LoginActivity.this, "Sign in successfull", Toast.LENGTH_SHORT).show();
-                        Intent intent  = new Intent(getApplicationContext(), HomeActivity.class);
-                        startActivity(intent);
-                    }else{
-                        Toast.makeText(LoginActivity.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
-                    }
+            if(user.equals("")||pass.equals(""))
+                Toast.makeText(LoginActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
+            else{
+                Boolean checkuserpass = DB.checkusernamepassword(user, pass);
+                if(checkuserpass){
+                    Toast.makeText(LoginActivity.this, "Sign in successfull", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(LoginActivity.this, HeartRateActivity.class);
+                    startActivity(intent);
+
+                }else{
+                    Toast.makeText(LoginActivity.this, "Invalid Credentials", Toast.LENGTH_SHORT).show();
                 }
             }
         });
