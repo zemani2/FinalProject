@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.idanlogin"
+    namespace = "com.example.anxietyByHeartRate"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.idanlogin"
+        applicationId = "com.example.anxietyByHeartRate"
         minSdk = 27
         targetSdk = 34
         versionCode = 1

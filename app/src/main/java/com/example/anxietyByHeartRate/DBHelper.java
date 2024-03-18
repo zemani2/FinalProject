@@ -1,4 +1,4 @@
-package com.example.idanlogin;
+package com.example.anxietyByHeartRate;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;

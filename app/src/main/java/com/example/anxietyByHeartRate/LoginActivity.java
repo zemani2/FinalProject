@@ -1,17 +1,12 @@
-package com.example.idanlogin;
+package com.example.anxietyByHeartRate;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 
 public class LoginActivity extends AppCompatActivity {
     EditText username, password;
@@ -39,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
                 if(checkuserpass){
                     Toast.makeText(LoginActivity.this, "Sign in successfull", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(LoginActivity.this, HeartRateActivity.class);
+                    intent.putExtra("USERNAME", user);
                     startActivity(intent);
 
                 }else{

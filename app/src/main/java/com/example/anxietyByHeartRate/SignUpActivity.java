@@ -1,4 +1,4 @@
-package com.example.idanlogin;
+package com.example.anxietyByHeartRate;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,13 +16,10 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
     EditText username, password, repassword;
     Button signup, signin;
     private ToggleButton toggleButtonPassword;
@@ -38,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_signup);
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
         repassword = (EditText) findViewById(R.id.repassword);
@@ -128,24 +125,24 @@ public class MainActivity extends AppCompatActivity {
                 int weight = Integer.parseInt(weightSpinner.getSelectedItem().toString().replaceAll("[^0-9]", ""));
                 int height = Integer.parseInt(heightSpinner.getSelectedItem().toString().replaceAll("[^0-9]", ""));
                 if (user.equals("") || pass.equals("") || repass.equals(""))
-                    Toast.makeText(MainActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
                 else {
                     if (pass.equals(repass)) {
                         Boolean checkuser = DB.checkusername(user);
                         if (checkuser == false) {
                             Boolean insert = DB.insertData(user, pass, age, height, weight); // Pass age to the insertData method
                             if (insert == true) {
-                                Toast.makeText(MainActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(MainActivity.this, HeartRateActivity.class);
+                                Toast.makeText(SignUpActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(SignUpActivity.this, HeartRateActivity.class);
                                 startActivity(intent);
                             } else {
-                                Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignUpActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            Toast.makeText(MainActivity.this, "User already exists! please sign in", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignUpActivity.this, "User already exists! please sign in", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(MainActivity.this, "Passwords not matching", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignUpActivity.this, "Passwords not matching", Toast.LENGTH_SHORT).show();
                     }
                 }
             }

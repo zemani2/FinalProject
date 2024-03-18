@@ -1,5 +1,6 @@
-package com.example.idanlogin;
+package com.example.anxietyByHeartRate;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,12 +19,16 @@ public class HeartRateActivity extends AppCompatActivity {
     private int heartRate = 60; // Initial heart rate value (beats per minute)
     private Handler handler = new Handler();
     private DBHelper DB;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart_rate);
-
+        Intent intent = getIntent();
+        if (intent != null) {
+            username = intent.getStringExtra("USERNAME");
+        }
         heartRateTextView = findViewById(R.id.heartRateTextView);
 
         // Retrieve serialized DBHelper instance from intent
@@ -73,7 +78,6 @@ public class HeartRateActivity extends AppCompatActivity {
 
     private void saveHeartRateToDatabase(int heartRate) {
         // Call the insertHeartRate method of DBHelper to save the heart rate to the database
-        String username = "user123"; // Replace "user123" with the actual username
         DB.insertHeartRate(username, heartRate);
     }
 

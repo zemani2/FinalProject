@@ -1,0 +1,5 @@
+<layout id="WatchFace">
+    <label id="TimeLabel" x="center" y="50" font="Graphics.FONT_LARGE" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_BLUE" />
+    <label id="HeartRateLabel" x="center" y="100" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_BLUE" />
+
+</layout>
