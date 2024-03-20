@@ -133,7 +133,11 @@ public class SignUpActivity extends AppCompatActivity {
                             Boolean insert = DB.insertData(user, pass, age, height, weight); // Pass age to the insertData method
                             if (insert == true) {
                                 Toast.makeText(SignUpActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(SignUpActivity.this, HeartRateActivity.class);
+                                Intent intent = new Intent(SignUpActivity.this, HomePageActivity.class);
+                                intent.putExtra("USERNAME", user);
+                                intent.putExtra("AGE", age);
+                                intent.putExtra("WEIGHT", weight);
+                                intent.putExtra("HEIGHT", height);
                                 startActivity(intent);
                             } else {
                                 Toast.makeText(SignUpActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
