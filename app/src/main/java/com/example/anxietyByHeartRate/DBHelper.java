@@ -10,20 +10,21 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DBHelper extends SQLiteOpenHelper implements Serializable {
     public static final String DBNAME = "Login4.db";
-    private static final String TABLE_NAME = "users";
+    public static final String USERS_TABLE_NAME = "users";
 
-    private static final String TABLE_NAME_STRESS = "stress";
-    private static final String COL_1 = "ID";
-    private static final String COL_USERNAME = "username";
-    private static final String COL_PASSWORD = "password";
-    private static final String COL_AGE = "age"; // Add age column
+    public static final String TABLE_NAME_STRESS = "stress";
+    public static final String COL_USERNAME = "username";
+    public static final String COL_PASSWORD = "password";
+    public static final String COL_AGE = "age"; // Add age column
 
-    private static final String COL_HEIGHT = "height";
-    private static final String COL_WEIGHT = "weight";
-    private static final String TABLE_NAME_HEART_RATE = "heart_rate";
+    public static final String COL_HEIGHT = "height";
+    public static final String COL_WEIGHT = "weight";
+    public static final String TABLE_NAME_HEART_RATE = "heart_rate";
     // Columns for heart_rate table
     private static final String COL_HEART_RATE = "heart_rate";
     private static final String COL_TIMESTAMP = "timestamp";
@@ -32,7 +33,7 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
             " (" + COL_USERNAME + " TEXT, " +
             COL_HEART_RATE + " INTEGER, " +
             COL_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
-    private static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME +
+    private static final String CREATE_TABLE = "CREATE TABLE " + USERS_TABLE_NAME +
             " (" + COL_USERNAME + " TEXT PRIMARY KEY, " +
             COL_PASSWORD + " TEXT, " +
             COL_AGE + " INTEGER, " +
@@ -57,10 +58,28 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
         myDB.execSQL(CREATE_TABLE_STRESS);
 
     }
-
+    public Map<String, String> getDetails(String username, String fields []) {
+        Map<String, String> details = new HashMap<>();
+        String query = "SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + COL_USERNAME + "='" + username + "'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            for (String field : fields) {
+                int columnIndex = cursor.getColumnIndex(field);
+                if (columnIndex != -1) {
+                    // Retrieve the value of each field from the cursor
+                    String value = cursor.getString(columnIndex);
+                    // Store the field name and value in the details map
+                    details.put(field, value);
+                }
+            }
+        }
+        cursor.close();
+        return details;
+    }
     @Override
     public void onUpgrade(SQLiteDatabase myDB, int oldVersion, int newVersion) {
-        myDB.execSQL("drop Table if exists "+TABLE_NAME);
+        myDB.execSQL("drop Table if exists "+ USERS_TABLE_NAME);
         myDB.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_HEART_RATE);
         myDB.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_STRESS);
     }
@@ -130,7 +149,7 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
         contentValues.put(COL_AGE, age); // Insert age into the database
         contentValues.put(COL_HEIGHT, height);
         contentValues.put(COL_WEIGHT, weight);
-        long result = db.insert(TABLE_NAME, null, contentValues);
+        long result = db.insert(USERS_TABLE_NAME, null, contentValues);
         return result != -1;
     }
 

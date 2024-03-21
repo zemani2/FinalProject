@@ -42,8 +42,6 @@ public class SignUpActivity extends AppCompatActivity {
         signin = (Button) findViewById(R.id.signin);
         signup = (Button) findViewById(R.id.signup);
         DB = new DBHelper(this);
-        toggleButtonPassword = findViewById(R.id.toggleButtonpassword);
-        toggleButtonRePassword = findViewById(R.id.toggleButtonrepassword);
         heightSpinner = findViewById(R.id.heightSpinner);
         weightSpinner = findViewById(R.id.weightSpinner);
         heightSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -82,32 +80,6 @@ public class SignUpActivity extends AppCompatActivity {
         height_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         heightSpinner.setAdapter(height_adapter);
 
-        toggleButtonPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // Show/Hide the password
-                if (isChecked) {
-                    password.setInputType(InputType.TYPE_CLASS_TEXT);
-                } else {
-                    password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                }
-                // Move cursor to the end of the text
-                password.setSelection(password.getText().length());
-            }
-        });
-        toggleButtonRePassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // Show/Hide the password
-                if (isChecked) {
-                    repassword.setInputType(InputType.TYPE_CLASS_TEXT);
-                } else {
-                    repassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                }
-                // Move cursor to the end of the text
-                repassword.setSelection(repassword.getText().length());
-            }
-        });
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
