@@ -1,8 +1,7 @@
 # 💡 AI-Enhanced Stress Detection for Children 
-Use this template to describe and document your engineering project.
 
 <!-- cool project cover image -->
-![Project Cover Image](/media/project-cover-img.jpg)
+![Project Cover Image](Apple-watch-HR-main-1-1024x614.jpg)
 
 <!-- table of content -->
 ## Table of Contents
@@ -18,19 +17,35 @@ Use this template to describe and document your engineering project.
 
 ## 👥 The Team 
 **Team Members**
-- [Member 1](name@emial.com)
-- [Member 2](name@emial.com)
+- [Shira Dahan](shira.dahan@mail.huji.ac.il)
+- [Idan Zeman](idan.zeman@mail.huji.ac.il)
 
-**Supervisor**
-- [Supervisor](wwww.link_to_lab.com)
+**Mentor**
+- [Rhea Chowers](rhea.chowers@mail.huji.ac.il)
 
 
 ## 📚 Project Description
-- A brief description of the project/challange, what it does, and how it works.
-- A list of the main features and functionalities of the project.
-- A list of the main components of the project.
-- A list of the main technologies used in the project.
+The project aims to address the pressing issue of undetected anxiety and stress in children by leveraging smartwatch technology integrated with advanced AI algorithms. It detects and alerts parents in real-time when their child experiences heightened levels of anxiety, enabling timely intervention and support. By utilizing the smartwatch's sensors, particularly heart rate data, the system identifies patterns indicative of stress or anxiety episodes, offering proactive insights into the child's mental well-being.
+## Features and Functionalities
+- **Real-time Anxiety Detection**: Continuously monitors the child's heart rate to detect fluctuations indicating heightened stress or anxiety levels.
+- **Parental Alerts**: Instant notifications on parents' smartphones when significant changes in their child's stress levels are detected.
+- **Customized Intervention**: Allows parents to provide tailored support and intervention based on real-time insights into their child's mental state.
+- **User-friendly Interface**: Offers a simple and intuitive interface for both children and parents, ensuring ease of use and accessibility.
+- **Data Analysis**: Advanced AI algorithms analyze heart rate data to identify patterns and trends related to anxiety, facilitating deeper understanding and proactive management.
 
+## Components
+- **Smartwatch Sensors**: Utilizes sensors such as heart rate monitors for real-time physiological data collection.
+- **AI Algorithms**: Processes collected data to detect patterns indicative of stress or anxiety episodes.
+- **Parental Interface**: Mobile application interface for parental alerts and access to insights into their child's mental health.
+- **Data Storage and Analysis**: Infrastructure for storing and analyzing heart rate data to generate actionable insights.
+- **Communication Module**: Facilitates seamless communication between the smartwatch, AI algorithms, and parental interface.
+
+## Technologies Used
+- **Smartwatch Technology**: Existing smartwatch hardware with integrated sensors for data collection.
+- **Artificial Intelligence (AI)**: Advanced algorithms for processing and analyzing heart rate data to detect patterns indicative of anxiety.
+- **Mobile Application Development**: Development of a user-friendly mobile application for parental alerts and insights.
+- **Cloud Computing**: Infrastructure for data storage, analysis, and communication between components.
+- **Machine Learning**: Techniques to improve the accuracy of anxiety detection algorithms over time.
 
 ## ⚡ Getting Started
 
