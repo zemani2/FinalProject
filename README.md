@@ -1,4 +1,4 @@
-# 💡 Project Title
+# 💡 AI-Enhanced Stress Detection for Children 
 Use this template to describe and document your engineering project.
 
 <!-- cool project cover image -->
