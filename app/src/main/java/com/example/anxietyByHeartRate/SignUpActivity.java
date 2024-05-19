@@ -1,20 +1,18 @@
 package com.example.anxietyByHeartRate;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +63,7 @@ public class SignUpActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, ageOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         ageSpinner.setAdapter(adapter);
+        ageSpinner.setSelection(19); // Set default age to 20
         List<String> weightOptions = new ArrayList<>();
         for (int i = 30; i <= 120; i++) {
             weightOptions.add(String.valueOf(i) + " kg");
@@ -72,6 +71,8 @@ public class SignUpActivity extends AppCompatActivity {
         ArrayAdapter<String> weight_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, weightOptions);
         weight_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         weightSpinner.setAdapter(weight_adapter);
+        weightSpinner.setSelection(40); // Set default weight to 70
+
         List<String> heightOptions = new ArrayList<>();
         for (int i = 70; i <= 200; i++) {
             heightOptions.add(String.valueOf(i) + " cm");
@@ -79,6 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
         ArrayAdapter<String> height_adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, heightOptions);
         height_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         heightSpinner.setAdapter(height_adapter);
+        heightSpinner.setSelection(100); // Set default height to 170
 
         signin.setOnClickListener(new View.OnClickListener() {
             @Override

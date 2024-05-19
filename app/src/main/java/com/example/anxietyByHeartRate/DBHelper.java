@@ -3,7 +3,6 @@ package com.example.anxietyByHeartRate;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -14,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DBHelper extends SQLiteOpenHelper implements Serializable {
-    public static final String DBNAME = "Login4.db";
+    public static final String DBNAME = "Users.db";
     public static final String USERS_TABLE_NAME = "users";
 
     public static final String TABLE_NAME_STRESS = "stress";
@@ -28,7 +27,7 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
     // Columns for heart_rate table
     private static final String COL_HEART_RATE = "heart_rate";
     private static final String COL_TIMESTAMP = "timestamp";
-    private Context context;
+    private final Context context;
     private static final String CREATE_TABLE_HEART_RATE = "CREATE TABLE " + TABLE_NAME_HEART_RATE +
             " (" + COL_USERNAME + " TEXT, " +
             COL_HEART_RATE + " INTEGER, " +
@@ -58,7 +57,7 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
         myDB.execSQL(CREATE_TABLE_STRESS);
 
     }
-    public Map<String, String> getDetails(String username, String fields []) {
+    public Map<String, String> getDetails(String username, String[] fields) {
         Map<String, String> details = new HashMap<>();
         String query = "SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + COL_USERNAME + "='" + username + "'";
         SQLiteDatabase db = this.getReadableDatabase();
@@ -75,6 +74,8 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
             }
         }
         cursor.close();
+
+        Log.d("TableGetDetails", "return values: "+details.values());
         return details;
     }
     @Override
@@ -86,7 +87,7 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
     private static boolean isStressPrompted = false; // Flag to track if stress prompt is shown
     private static boolean isStressed = false; // Flag to track user's response
     // Method to insert heart rate data
-    public boolean insertHeartRate(String username, int heartRate) {
+    public void insertHeartRate(String username, int heartRate) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_USERNAME, username);
@@ -99,20 +100,14 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
             isStressPrompted = true; // Stress prompt shown
             builder.setTitle("Are you in stress?")
                     .setMessage("Your heart rate is above 65. Are you in stress?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // Insert stress data into new table
-                            insertStressData(username, heartRate);
-                            printTable(TABLE_NAME_STRESS);
-                            isStressed = true; // User is stressed
-                        }
+                    .setPositiveButton("Yes", (dialogInterface, i) -> {
+                        // Insert stress data into new table
+                        insertStressData(username, heartRate);
+                        printTable(TABLE_NAME_STRESS);
+                        isStressed = true; // User is stressed
                     })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            isStressed = false; // User is not stressed
-                        }
+                    .setNegativeButton("No", (dialogInterface, i) -> {
+                        isStressed = false; // User is not stressed
                     })
                     .show();
         }
@@ -122,7 +117,6 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
             isStressPrompted = false; // Reset stress prompt flag
             isStressed = false; // Reset stress flag
         }
-        return result != -1;
     }
     private void insertStressData(String username, int heartRate) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -150,6 +144,9 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
         contentValues.put(COL_HEIGHT, height);
         contentValues.put(COL_WEIGHT, weight);
         long result = db.insert(USERS_TABLE_NAME, null, contentValues);
+        Log.d("TableUpdate", "Insert new user: " + username +", age: "+age
+                +", height: "+height+", weight: "+weight);
+
         return result != -1;
     }
 
@@ -205,5 +202,23 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
         }
 
         cursor.close();
+    }
+    public boolean updateUserData(int age, int height, int weight, String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_AGE, age);
+        contentValues.put(COL_HEIGHT, height);
+        contentValues.put(COL_WEIGHT, weight);
+
+        // Specify where clause to update data for a specific user
+        String selection = COL_USERNAME + "=?";
+        String[] selectionArgs = {username};
+
+        // Update the data
+        int rowsAffected = db.update(USERS_TABLE_NAME, contentValues, selection, selectionArgs);
+
+        Log.d("TableUpdate", "updateUserData user: " + username +", age: "+age
+                +", height: "+height+", weight: "+weight);
+        return rowsAffected > 0;
     }
 }

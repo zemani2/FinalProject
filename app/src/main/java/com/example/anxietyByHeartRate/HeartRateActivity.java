@@ -9,10 +9,11 @@ import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
 public class HeartRateActivity extends AppCompatActivity {
 
     private TextView heartRateTextView;
@@ -20,6 +21,8 @@ public class HeartRateActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private DBHelper DB;
     private String username;
+    private LinkedList<HeartRateStamp> HeartRateData;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,13 @@ public class HeartRateActivity extends AppCompatActivity {
                 videoView.start();
             }
         });
+        try {
+            readHeartRateData(); // Assuming the file name is data.txt
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
+        heartRate = HeartRateData.remove(HeartRateData.size()-1).beatsPerMinute;
 
         // Simulate changing heart rate every second
         handler.postDelayed(new Runnable() {
@@ -58,12 +67,7 @@ public class HeartRateActivity extends AppCompatActivity {
 
     private void updateHeartRate() {
         // Simulate changing heart rate value
-        heartRate += (int) (Math.random() * 11) - 5; // Change heart rate by -5 to +5 beats
-        if (heartRate < 50) {
-            heartRate = 50; // Ensure heart rate does not fall below 50
-        } else if (heartRate > 75) {
-            heartRate = 75; // Ensure heart rate does not exceed 75
-        }
+        heartRate = HeartRateData.remove(HeartRateData.size()-1).beatsPerMinute;
         heartRateTextView.setText(getString(R.string.heart_rate, heartRate)); // Update heart rate display
 
         // Increment the counter
@@ -75,10 +79,36 @@ public class HeartRateActivity extends AppCompatActivity {
 //            DB.printTable("heart_rate");
         }
     }
+    private void readHeartRateData() throws IOException {
+        HeartRateData = new LinkedList<>();
+        InputStream is = this.getResources().openRawResource(R.raw.data);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line;
+        // Skip the header
+        reader.readLine();
+        while ((line = reader.readLine()) != null) {
+            // Split the line by tab character
+            String[] parts = line.split(",");
+            // Extract the beats per minute value (assuming it's the last column)
+            int beatsPerMinute = Integer.parseInt(parts[parts.length - 1]);
+            String time = parts[parts.length - 2];
+            // Push the beats per minute value onto the stack
+            HeartRateData.push(new HeartRateStamp(time, beatsPerMinute));
+        }
+        reader.close();
 
+    }
     private void saveHeartRateToDatabase(int heartRate) {
         // Call the insertHeartRate method of DBHelper to save the heart rate to the database
         DB.insertHeartRate(username, heartRate);
+    }
+    static class HeartRateStamp{
+        int beatsPerMinute;
+        String isoDate;
+        public HeartRateStamp(String isoDate, int beatsPerMinute) {
+            this.beatsPerMinute = beatsPerMinute;
+            this.isoDate = isoDate;
+        }
     }
 
 }
