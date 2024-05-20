@@ -1,6 +1,5 @@
 package com.example.anxietyByHeartRate;
 
-import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -25,8 +24,8 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
     public static final String COL_WEIGHT = "weight";
     public static final String TABLE_NAME_HEART_RATE = "heart_rate";
     // Columns for heart_rate table
-    private static final String COL_HEART_RATE = "heart_rate";
-    private static final String COL_TIMESTAMP = "timestamp";
+    public static final String COL_HEART_RATE = "heart_rate";
+    public static final String COL_TIMESTAMP = "timestamp";
     private final Context context;
     private static final String CREATE_TABLE_HEART_RATE = "CREATE TABLE " + TABLE_NAME_HEART_RATE +
             " (" + COL_USERNAME + " TEXT, " +
@@ -93,30 +92,30 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
         contentValues.put(COL_USERNAME, username);
         contentValues.put(COL_HEART_RATE, heartRate);
         long result = db.insert(TABLE_NAME_HEART_RATE, null, contentValues);
-        if (heartRate > 65 && !isStressPrompted) {
-            Log.d("isStressPrompted", "isStressPrompted : "+ isStressPrompted);
-            // Prompt user with dialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
-            isStressPrompted = true; // Stress prompt shown
-            builder.setTitle("Are you in stress?")
-                    .setMessage("Your heart rate is above 65. Are you in stress?")
-                    .setPositiveButton("Yes", (dialogInterface, i) -> {
-                        // Insert stress data into new table
-                        insertStressData(username, heartRate);
-                        printTable(TABLE_NAME_STRESS);
-                        isStressed = true; // User is stressed
-                    })
-                    .setNegativeButton("No", (dialogInterface, i) -> {
-                        isStressed = false; // User is not stressed
-                    })
-                    .show();
-        }
+//        if (heartRate > 65 && !isStressPrompted) {
+//            Log.d("isStressPrompted", "isStressPrompted : "+ isStressPrompted);
+//            // Prompt user with dialog
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
+//            isStressPrompted = true; // Stress prompt shown
+//            builder.setTitle("Are you in stress?")
+//                    .setMessage("Your heart rate is above 65. Are you in stress?")
+//                    .setPositiveButton("Yes", (dialogInterface, i) -> {
+//                        // Insert stress data into new table
+//                        insertStressData(username, heartRate);
+//                        printTable(TABLE_NAME_STRESS);
+//                        isStressed = true; // User is stressed
+//                    })
+//                    .setNegativeButton("No", (dialogInterface, i) -> {
+//                        isStressed = false; // User is not stressed
+//                    })
+//                    .show();
+//        }
 
         // Check if heart rate is below 60 and user was previously stressed
-        if (heartRate < 60 && isStressed) {
-            isStressPrompted = false; // Reset stress prompt flag
-            isStressed = false; // Reset stress flag
-        }
+//        if (heartRate < 60 && isStressed) {
+//            isStressPrompted = false; // Reset stress prompt flag
+//            isStressed = false; // Reset stress flag
+//        }
     }
     private void insertStressData(String username, int heartRate) {
         SQLiteDatabase db = this.getWritableDatabase();
