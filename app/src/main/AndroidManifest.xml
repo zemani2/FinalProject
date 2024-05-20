@@ -3,11 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.anxietyByHeartRate">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-
 
     <application
         android:allowBackup="true"
@@ -17,10 +15,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IdanLogin"
         tools:targetApi="34">
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
+
         <service
             android:name=".HeartRateService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <activity
             android:name=".UserInfoActivity"

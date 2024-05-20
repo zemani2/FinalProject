@@ -25,6 +25,7 @@ public class HomePageActivity extends AppCompatActivity {
 
         Button myInfoButton = findViewById(R.id.myInfoButton);
         Button heartRateButton = findViewById(R.id.heartRateButton);
+        Button historyButton = findViewById(R.id.historyButton); // Reference to the History Button
 
         heartRateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,6 +43,15 @@ public class HomePageActivity extends AppCompatActivity {
                 intent.putExtra("AGE", age);
                 intent.putExtra("WEIGHT", weight);
                 intent.putExtra("HEIGHT", height);
+                startActivity(intent);
+            }
+        });
+
+        // Open History Activity when History Button is clicked
+        historyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomePageActivity.this, HistoryActivity.class);
                 startActivity(intent);
             }
         });
