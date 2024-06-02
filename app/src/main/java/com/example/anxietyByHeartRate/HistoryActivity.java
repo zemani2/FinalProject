@@ -1,13 +1,21 @@
 package com.example.anxietyByHeartRate;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,7 +23,8 @@ import java.util.Locale;
 
 public class HistoryActivity extends AppCompatActivity {
 
-    private DBHelper dbHelper;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,23 +32,41 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
 
         // Initialize DBHelper
-        dbHelper = new DBHelper(this);
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+        // Retrieve data from Firestore
+        retrieveData();  }
 
-        // Retrieve data from the database
-        Cursor cursor = retrieveData();
+    private void retrieveData() {
+        if (mAuth.getCurrentUser() != null) {
+            // Get the current user's UID
+            String uid = mAuth.getCurrentUser().getUid();
 
-        // Display data in the table layout
-        displayData(cursor);
+            // Reference to the "stressData" subcollection for the current user
+            CollectionReference stressDataRef = db.collection("users").document(uid).collection("stressData");
+
+            // Query the "stressData" subcollection
+            stressDataRef.get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            displayData(queryDocumentSnapshots);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("HistoryActivity", "Error retrieving data: " + e.getMessage());
+                        }
+                    });
+        } else {
+            Log.e("HistoryActivity", "User is not authenticated");
+        }
     }
 
-    private Cursor retrieveData() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {DBHelper.COL_HEART_RATE, DBHelper.COL_TIMESTAMP}; // Remove username column
-        String sortOrder = DBHelper.COL_TIMESTAMP + " DESC"; // Sort by timestamp in descending order
-        return db.query(DBHelper.TABLE_NAME_STRESS, projection, null, null, null, null, sortOrder);
-    }
 
-    private void displayData(Cursor cursor) {
+
+    private void displayData(QuerySnapshot queryDocumentSnapshots) {
         TableLayout tableLayout = findViewById(R.id.tableLayout);
 
         // Add table headers
@@ -61,11 +88,11 @@ public class HistoryActivity extends AppCompatActivity {
         addSeparatorLine(tableLayout);
 
         // Add data rows
-        while (cursor.moveToNext()) {
-            int heartRate = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.COL_HEART_RATE));
-            long timestampMillis = cursor.getLong(cursor.getColumnIndexOrThrow(DBHelper.COL_TIMESTAMP));
+        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+            int heartRate = document.getLong("heartRate").intValue();
+            Date timestamp = document.getDate("timestamp");
 
-            String formattedTimestamp = formatDate(timestampMillis);
+            String formattedTimestamp = formatDate(timestamp);
 
             TableRow dataRow = new TableRow(this);
             TextView heartRateTextView = new TextView(this);
@@ -81,10 +108,8 @@ public class HistoryActivity extends AppCompatActivity {
 
             tableLayout.addView(dataRow);
         }
-
-        // Close cursor after use
-        cursor.close();
     }
+
 
     private void addSeparatorLine(TableLayout tableLayout) {
         TableRow separatorRow = new TableRow(this);
@@ -99,12 +124,10 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
 
-    private String formatDate(long timestampMillis) {
+    private String formatDate(Date timestamp) {
         // Create a SimpleDateFormat object with the desired date and time format
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
-        // Convert the timestamp to a Date object
-        Date date = new Date(timestampMillis);
         // Format the Date object and return the formatted timestamp as a string
-        return sdf.format(date);
+        return sdf.format(timestamp);
     }
 }

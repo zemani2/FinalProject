@@ -27,6 +27,7 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
     public static final String COL_HEART_RATE = "heart_rate";
     public static final String COL_TIMESTAMP = "timestamp";
     private final Context context;
+
     private static final String CREATE_TABLE_HEART_RATE = "CREATE TABLE " + TABLE_NAME_HEART_RATE +
             " (" + COL_USERNAME + " TEXT, " +
             COL_HEART_RATE + " INTEGER, " +
@@ -50,10 +51,11 @@ public class DBHelper extends SQLiteOpenHelper implements Serializable {
 
     @Override
     public void onCreate(SQLiteDatabase myDB) {
-
         myDB.execSQL(CREATE_TABLE);
         myDB.execSQL(CREATE_TABLE_HEART_RATE);
         myDB.execSQL(CREATE_TABLE_STRESS);
+//        StorageReference mountainsRef = storageRef.child("mountains.jpg");
+
 
     }
     public Map<String, String> getDetails(String username, String[] fields) {

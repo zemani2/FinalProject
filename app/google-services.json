@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "589311944287",
+    "project_id": "anxiety-detaction",
+    "storage_bucket": "anxiety-detaction.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589311944287:android:72615561ab2cfc0e7eddea",
+        "android_client_info": {
+          "package_name": "com.example.anxietyByHeartRate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAnhASkrwxbnyo_ydwOJkmxFTNy86dzs8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

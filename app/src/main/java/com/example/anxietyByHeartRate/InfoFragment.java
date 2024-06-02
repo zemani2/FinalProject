@@ -1,6 +1,7 @@
 package com.example.anxietyByHeartRate;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,17 +38,17 @@ public class InfoFragment extends Fragment {
     private TextView ageTextView;
     private TextView weightTextView;
     private TextView heightTextView;
+    private TextView usernameTextView;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
     public InfoFragment() {
         // Required empty public constructor
     }
 
-    public static InfoFragment newInstance(int age, int weight, int height, String username) {
+    public static InfoFragment newInstance() {
         InfoFragment fragment = new InfoFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_AGE, age);
-        args.putInt(ARG_WEIGHT, weight);
-        args.putInt(ARG_HEIGHT, height);
-        args.putString(ARG_USERNAME, username);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,12 +56,34 @@ public class InfoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            age = getArguments().getInt(ARG_AGE);
-            weight = getArguments().getInt(ARG_WEIGHT);
-            height = getArguments().getInt(ARG_HEIGHT);
-            username = getArguments().getString(ARG_USERNAME);
-        }
+    }
+
+    private void setUserData(View view, String userId) {
+        db.collection("users").document(userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            Map<String, Object> userDetails = document.getData();
+                            if (userDetails != null) {
+                                age = Integer.parseInt(String.valueOf(userDetails.get("age")));
+                                weight = Integer.parseInt(String.valueOf(userDetails.get("weight")));
+                                height = Integer.parseInt(String.valueOf(userDetails.get("height")));
+
+                                ageTextView.setText("Age: " + age);
+                                weightTextView.setText("Weight: " + weight + " kg");
+                                heightTextView.setText("Height: " + height + " cm");
+                            }
+                        } else {
+                            // Document doesn't exist
+                            Log.d("Firestore", "No such document");
+                        }
+                    } else {
+                        // Error fetching document
+                        Log.d("Firestore", "get failed with ", task.getException());
+                    }
+                });
     }
 
     @Nullable
@@ -65,12 +95,16 @@ public class InfoFragment extends Fragment {
         ageTextView = view.findViewById(R.id.ageTextView);
         weightTextView = view.findViewById(R.id.weightTextView);
         heightTextView = view.findViewById(R.id.heightTextView);
+
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        assert currentUser != null;
+        String userId = currentUser.getUid();
+        setUserData(view, userId);
+
         ImageButton editButton = view.findViewById(R.id.editButton);
-
-        ageTextView.setText("Age: " + age);
-        weightTextView.setText("Weight: " + weight + " kg");
-        heightTextView.setText("Height: " + height + " cm");
-
         editButton.setOnClickListener(v -> {
             EditFragment editFragment = EditFragment.newInstance(age, weight, height, username);
             requireActivity().getSupportFragmentManager().beginTransaction()
@@ -81,6 +115,7 @@ public class InfoFragment extends Fragment {
 
         return view;
     }
+
     public void updateData(int selectedAge, int selectedWeight, int selectedHeight) {
         age = selectedAge;
         weight = selectedWeight;

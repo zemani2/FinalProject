@@ -17,7 +17,8 @@
         tools:targetApi="34">
         <activity
             android:name=".HistoryActivity"
-            android:exported="false" />
+            android:exported="false"
+            tools:ignore="AppLinkUrlError" />
 
         <service
             android:name=".HeartRateService"
@@ -48,11 +49,23 @@
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
             android:name=".SignUpActivity"
             android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Define your custom URL scheme and host -->
+                <data
+                    android:scheme="https"
+                    android:host="com.example.anxietyByHeartRate.oauth"
+                    android:pathPrefix="/oauth_callback"
+                    tools:ignore="AppLinkUrlError" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

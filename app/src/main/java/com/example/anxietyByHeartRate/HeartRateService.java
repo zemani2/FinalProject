@@ -5,10 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,17 +17,25 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class HeartRateService extends Service {
 
     private Handler handler = new Handler();
-    private DBHelper DB;
-    private String username;
     private LinkedList<HeartRateActivity.HeartRateStamp> HeartRateData;
     private int heartRate;
     private int updateCounter = 0;
@@ -37,23 +43,27 @@ public class HeartRateService extends Service {
     private static final String ACTION_INSERT_STRESS_DATA = "com.example.anxietyByHeartRate.ACTION_INSERT_STRESS_DATA";
     private static final String ACTION_DISMISS_NOTIFICATION = "com.example.anxietyByHeartRate.ACTION_DISMISS_NOTIFICATION";
     boolean inStress = false;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
+    private static final String BASE_URL = "https://apis.garmin.com/";
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         if (intent != null) {
             String action = intent.getAction();
             int notificationId = intent.getIntExtra("NOTIFICATION_ID", -1); // Get notification ID
             if (ACTION_INSERT_STRESS_DATA.equals(action)) {
                 // Insert stress data
-                username = intent.getStringExtra("USERNAME");
                 heartRate = intent.getIntExtra("HEART_RATE", 0);
-                DB = new DBHelper(this);
-                insertStressData(username, heartRate);
+                insertStressData(heartRate);
 
                 // Cancel the notification
                 if (notificationId != -1) {
@@ -70,8 +80,6 @@ public class HeartRateService extends Service {
                     notificationManager.cancel(notificationId);
                 }
             } else {
-                username = intent.getStringExtra("USERNAME");
-                DB = new DBHelper(this);
                 try {
                     readHeartRateData();
                 } catch (IOException e) {
@@ -134,17 +142,56 @@ public class HeartRateService extends Service {
     }
 
     private void saveHeartRateToDatabase(int heartRate) {
-        DB.insertHeartRate(username, heartRate);
-    }
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            String uid = user.getUid();
 
-    private void insertStressData(String username, int heartRate) {
-        SQLiteDatabase db = DB.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DB.COL_USERNAME, username);
-        contentValues.put(DB.COL_HEART_RATE, heartRate);
-        contentValues.put(DB.COL_TIMESTAMP, System.currentTimeMillis()); // Timestamp
-        long result = db.insert(DB.TABLE_NAME_STRESS, null, contentValues);
-        Log.d("insertStressData:", "result: " + result);
+            // Get a reference to the collection "users" and the specific user's document
+            DocumentReference userRef = db.collection("users").document(uid);
+            CollectionReference heartRatesRef = userRef.collection("heartRates");
+
+            // Create a new document with a unique ID
+            Map<String, Object> data = new HashMap<>();
+            data.put("heartRate", heartRate);
+            data.put("timestamp", FieldValue.serverTimestamp()); // Add the current server timestamp
+
+            // Add the data to the collection
+            heartRatesRef.add(data)
+                    .addOnSuccessListener(documentReference -> {
+                        // Heart rate data added successfully
+                    })
+                    .addOnFailureListener(e -> {
+                        // Error adding heart rate data
+                    });
+        }
+    }
+    private void insertStressData(int heartRate) {
+        if (mAuth.getCurrentUser() != null) {
+            // Get the current user's UID
+            String uid = mAuth.getCurrentUser().getUid();
+
+            // Get a reference to the collection "users/{uid}/stressData"
+            CollectionReference stressDataRef = db.collection("users").document(uid).collection("stressData");
+
+            // Create a new document with an auto-generated ID
+            Map<String, Object> data = new HashMap<>();
+            data.put("heartRate", heartRate);
+            data.put("timestamp", Timestamp.now()); // Add the current timestamp
+
+            // Add the data to the collection
+            stressDataRef.add(data)
+                    .addOnSuccessListener(documentReference -> {
+                        // Stress data added successfully
+                        Log.d("insertStressData:", "DocumentSnapshot written with ID: " + documentReference.getId());
+                    })
+                    .addOnFailureListener(e -> {
+                        // Error adding stress data
+                        Log.w("insertStressData:", "Error adding document", e);
+                    });
+        } else {
+            // User is not authenticated
+            Log.w("insertStressData:", "User is not authenticated");
+        }
     }
 
     private void sendHighHeartRateNotification() {
@@ -154,7 +201,6 @@ public class HeartRateService extends Service {
 
         Intent yesIntent = new Intent(this, HeartRateService.class);
         yesIntent.setAction(ACTION_INSERT_STRESS_DATA);
-        yesIntent.putExtra("USERNAME", username);
         yesIntent.putExtra("HEART_RATE", heartRate); // Pass heart rate value
         yesIntent.putExtra("NOTIFICATION_ID", notificationId); // Pass notification ID
         PendingIntent yesPendingIntent = PendingIntent.getService(this, 0, yesIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

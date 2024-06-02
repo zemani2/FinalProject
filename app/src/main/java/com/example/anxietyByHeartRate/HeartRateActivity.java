@@ -1,6 +1,7 @@
 package com.example.anxietyByHeartRate;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,25 +37,20 @@ public class HeartRateActivity extends AppCompatActivity {
     private TextView heartRateTextView;
     private int heartRate = 60; // Initial heart rate value (beats per minute)
     private Handler handler = new Handler();
-    private DBHelper DB;
-    private String username;
+    private FirebaseFirestore db;
     private LinkedList<HeartRateStamp> HeartRateData;
-    private String UserAccessToken = "231a48cf-f488-4f72-bbe6-aa459ee1ac34";
-    private String UserAccessTokenSecret = "WHI3gPPPWDrbHemUbMP0Da9MmyDBwG0fIKu";
     private Button startStopButton;
-    private boolean isServiceRunning = false;
+    private static boolean isServiceRunning = false;
     private VideoView videoView;
     private ConstraintLayout constraintLayout;
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heart_rate);
+        db = FirebaseFirestore.getInstance();
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            username = intent.getStringExtra("USERNAME");
-        }
 
         heartRateTextView = findViewById(R.id.heartRateTextView);
         startStopButton = findViewById(R.id.startStopButton);
@@ -117,8 +115,7 @@ public class HeartRateActivity extends AppCompatActivity {
     }
 
     private void startHeartRateService() {
-        Intent serviceIntent = new Intent(this, HeartRateService.class);
-        serviceIntent.putExtra("USERNAME", username);
+        Intent serviceIntent = new Intent(this, HeartRateService.class);;
         startService(serviceIntent);
         isServiceRunning = true;
         startStopButton.setText("Stop");
@@ -176,9 +173,8 @@ public class HeartRateActivity extends AppCompatActivity {
         if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startHeartRateService();
-            } else {
-                // Handle the case where the user denies the permission
-            }
+            }  // Handle the case where the user denies the permission
+
         }
     }
 
@@ -201,10 +197,8 @@ public class HeartRateActivity extends AppCompatActivity {
         reader.close();
     }
 
-    private void saveHeartRateToDatabase(int heartRate) {
-        // Call the insertHeartRate method of DBHelper to save the heart rate to the database
-        DB.insertHeartRate(username, heartRate);
-    }
+
+
     private BroadcastReceiver heartRateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -216,6 +210,26 @@ public class HeartRateActivity extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (isServiceRunning) {
+            startStopButton.setText("Stop");
+            heartRateTextView.setText("Heart Rate: " + heartRate + " BPM");
+
+
+            // Move the button to the bottom of the screen
+            moveButtonToBottom();
+
+            videoView.setVisibility(View.VISIBLE);
+            videoView.start();
+        } else {
+            videoView.stopPlayback();
+            videoView.setVisibility(View.GONE);
+            setInitialHeartRateTextView();
+        }
+    }
 
     static class HeartRateStamp {
         int beatsPerMinute;
