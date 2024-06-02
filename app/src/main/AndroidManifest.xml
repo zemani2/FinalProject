@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
 
     <application
         android:allowBackup="true"
@@ -15,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IdanLogin"
         tools:targetApi="34">
+
         <activity
             android:name=".HistoryActivity"
             android:exported="false"
@@ -23,7 +28,8 @@
         <service
             android:name=".HeartRateService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="health" />
 
         <activity
             android:name=".UserInfoActivity"
@@ -36,7 +42,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -67,5 +72,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

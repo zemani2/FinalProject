@@ -23,7 +23,7 @@
             android:id="@+id/emailEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLength="20"
+            android:maxLength="35"
             android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
