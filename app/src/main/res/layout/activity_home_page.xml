@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@color/apple_light_gray"
     android:padding="16dp">
 
     <TextView
@@ -12,17 +13,9 @@
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"/>
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="@color/apple_dark_gray"
+        android:text="Welcome Back,"
+        android:fontFamily="@font/sf_pro_display_regular"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"/>
 
@@ -31,37 +24,65 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="My Information"
-        android:layout_below="@id/textView"
+        android:textSize="18sp"
+        android:backgroundTint="@color/black"
+        android:textColor="@color/white"
+        android:layout_below="@id/usernameTextView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="50dp" />
 
     <Button
-        android:id="@+id/heartRateButton"
+        android:id="@+id/reportsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Heart Rate"
+        android:text="Reports"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/black"
         android:layout_below="@id/myInfoButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
-    <!-- New History Button -->
     <Button
         android:id="@+id/historyButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="History"
-        android:layout_below="@id/heartRateButton"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/black"
+        android:layout_below="@id/reportsButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
+    <Button
+        android:id="@+id/myKidsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="My Kids"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/black"
+        android:layout_below="@id/historyButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:visibility="gone" /> <!-- Initially hidden -->
+
     <ImageButton
         android:id="@+id/logoutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="5dp"
-        app:srcCompat="@drawable/ic_logout" />
+        android:background="@null"
+        android:src="@drawable/ic_logout" />
+    <ProgressBar
+        android:id="@+id/loadingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
 </RelativeLayout>

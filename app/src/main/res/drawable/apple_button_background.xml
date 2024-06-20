@@ -1,0 +1,6 @@
+<!-- res/drawable/apple_button_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#333333"/> <!-- Apple Black -->
+    <corners android:radius="8dp"/> <!-- Adjust corner radius as needed -->
+</shape>

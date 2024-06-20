@@ -16,6 +16,12 @@
         android:theme="@style/Theme.IdanLogin"
         tools:targetApi="34">
         <activity
+            android:name=".ReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ParentDashboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".HistoryActivity"
             android:exported="false"
             tools:ignore="AppLinkUrlError" />
@@ -56,13 +62,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Define your custom URL scheme and host -->
                 <data
-                    android:scheme="https"
                     android:host="com.example.anxietyByHeartRate.oauth"
                     android:pathPrefix="/oauth_callback"
+                    android:scheme="https"
                     tools:ignore="AppLinkUrlError" />
             </intent-filter>
         </activity>

@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvKidEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kid Email" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvRequestStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12dp"
+            android:text="Request Status" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" /> <!-- Initially hidden -->
+
+        <ImageButton
+            android:id="@+id/btnAccept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_accept"
+            android:contentDescription="Accept Request"
+            android:background="@null" /> <!-- Set background to null to remove default background -->
+
+        <ImageButton
+            android:id="@+id/btnDecline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_decline"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="20dp"
+            android:contentDescription="Decline Request"
+            android:background="@null" /> <!-- Set background to null to remove default background -->
+
+    </LinearLayout>
+
+</LinearLayout>

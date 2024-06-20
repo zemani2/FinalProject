@@ -2,13 +2,15 @@ package com.example.anxietyByHeartRate;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,20 +21,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SignUpActivity extends AppCompatActivity {
-    EditText email, password, repassword;
+    EditText email, password, repassword, parentEmail;
     Button signup, signin;
-    private Spinner ageSpinner;
-    private Spinner heightSpinner;
-    private Spinner weightSpinner;
+    RadioButton kid, parent;
+    RadioGroup radioGroup;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -44,44 +44,23 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signup);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        email = findViewById(R.id.email);
-        password = findViewById(R.id.password);
-        repassword = findViewById(R.id.repassword);
-        signin = findViewById(R.id.signin);
-        signup = findViewById(R.id.signup);
-        heightSpinner = findViewById(R.id.heightSpinner);
-        weightSpinner = findViewById(R.id.weightSpinner);
-        ageSpinner = findViewById(R.id.ageSpinner);
+        email = findViewById(R.id.etEmail);
+        password = findViewById(R.id.etPassword);
+        repassword = findViewById(R.id.etRePassword);
+        signin = findViewById(R.id.btnLogin);
+        signup = findViewById(R.id.btnSignUp);
+        kid = findViewById(R.id.rbKid);
+        parent = findViewById(R.id.rbParent);
+        radioGroup = findViewById(R.id.radioGroupRole);
+        parentEmail = findViewById(R.id.etParentEmail);
 
-        // Setup age spinner
-        List<String> ageOptions = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
-            ageOptions.add(String.valueOf(i));
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, ageOptions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ageSpinner.setAdapter(adapter);
-        ageSpinner.setSelection(19); // Set default age to 20
-
-        // Setup weight spinner
-        List<String> weightOptions = new ArrayList<>();
-        for (int i = 30; i <= 120; i++) {
-            weightOptions.add(String.valueOf(i) + " kg");
-        }
-        ArrayAdapter<String> weightAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, weightOptions);
-        weightAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        weightSpinner.setAdapter(weightAdapter);
-        weightSpinner.setSelection(40); // Set default weight to 70
-
-        // Setup height spinner
-        List<String> heightOptions = new ArrayList<>();
-        for (int i = 70; i <= 200; i++) {
-            heightOptions.add(String.valueOf(i) + " cm");
-        }
-        ArrayAdapter<String> heightAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, heightOptions);
-        heightAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        heightSpinner.setAdapter(heightAdapter);
-        heightSpinner.setSelection(100); // Set default height to 170
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbKid) {
+                parentEmail.setVisibility(View.VISIBLE);
+            } else {
+                parentEmail.setVisibility(View.GONE);
+            }
+        });
 
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,17 +76,30 @@ public class SignUpActivity extends AppCompatActivity {
                 String emailText = email.getText().toString();
                 String pass = password.getText().toString();
                 String repass = repassword.getText().toString();
-                String firstName = ((EditText)findViewById(R.id.firstName)).getText().toString();
-                String lastName = ((EditText)findViewById(R.id.lastName)).getText().toString();
-                int age = Integer.parseInt(ageSpinner.getSelectedItem().toString());
-                int weight = Integer.parseInt(weightSpinner.getSelectedItem().toString().replaceAll("[^0-9]", ""));
-                int height = Integer.parseInt(heightSpinner.getSelectedItem().toString().replaceAll("[^0-9]", ""));
+                String firstName = ((EditText) findViewById(R.id.etFirstName)).getText().toString();
+                String lastName = ((EditText) findViewById(R.id.etLastName)).getText().toString();
+                int selectedId = radioGroup.getCheckedRadioButtonId();
+                String userType;
+                String parentEmailText = parentEmail.getText().toString();
 
-                if (emailText.equals("") || pass.equals("") || repass.equals("")) {
+                if (selectedId == parent.getId()) {
+                    userType = "parent";
+                } else if (selectedId == kid.getId()) {
+                    userType = "kid";
+                } else {
+                    userType = ""; // No selection made
+                }
+
+                if (emailText.equals("") || pass.equals("") || repass.equals("") ||
+                        (userType.equals("kid") && parentEmailText.equals(""))) {
                     Toast.makeText(SignUpActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
                 } else {
                     if (pass.equals(repass)) {
-                        createAccount(emailText, pass, age, weight, height, firstName, lastName);
+                        if (userType.equals("kid")) {
+                            checkParentEmailAndCreateAccount(parentEmailText, emailText, pass, firstName, lastName, userType);
+                        } else {
+                            createAccount(emailText, pass, firstName, lastName, userType);
+                        }
                     } else {
                         Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                     }
@@ -116,7 +108,80 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void createAccount(String emailText, String pass, int age, int weight, int height, String firstName, String lastName) {
+    private void checkParentEmailAndCreateAccount(String parentEmailText, String emailText, String pass, String firstName, String lastName, String userType) {
+        db.collection("users").whereEqualTo("email", parentEmailText).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!task.getResult().isEmpty()) {
+                            // Parent email found, proceed with account creation
+                            Log.d("Parent Email Check", "Parent email found: " + parentEmailText);
+                            createAccount(emailText, pass, firstName, lastName, userType);
+                            sendParentRequest(parentEmailText, emailText);
+                        } else {
+                            // Parent email not found
+                            Log.d("Parent Email Check", "Parent email not found: " + parentEmailText);
+                            Toast.makeText(SignUpActivity.this, "Parent email not found", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Error querying Firestore
+                        Log.e("Parent Email Check", "Error checking parent email: " + task.getException().getMessage());
+                        Toast.makeText(SignUpActivity.this, "Error checking parent email: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    private void sendParentRequest(String parentEmail, String kidEmail) {
+        // Check if parentEmail is valid and current user is authenticated
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Query Firestore to find the parent user document using parentEmail
+        db.collection("users")
+                .whereEqualTo("email", parentEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Ensure there is exactly one matching document
+                        if (task.getResult() != null && !task.getResult().isEmpty()) {
+                            // Assuming parentEmail is unique and there's only one match
+                            DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
+                            String parentId = parentDoc.getId(); // Get the parent's userId
+
+                            // Create a request object
+                            Map<String, Object> request = new HashMap<>();
+                            request.put("kidEmail", kidEmail);
+                            request.put("status", "pending");
+
+                            // Add the request under the parent's document in Firestore
+                            db.collection("users").document(parentId).collection("kids").document(kidEmail)
+                                    .set(request, SetOptions.merge())
+                                    .addOnCompleteListener(innerTask -> {
+                                        if (innerTask.isSuccessful()) {
+                                            Log.d("Firestore", "Parent request sent successfully");
+                                            // Optionally, notify the parent or update UI
+                                            Toast.makeText(this, "Parent request sent successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Log.d("Firestore", "Error sending parent request: " + innerTask.getException().getMessage());
+                                            Toast.makeText(this, "Failed to send parent request", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        } else {
+                            Log.d("Firestore", "No user found with email: " + parentEmail);
+                            Toast.makeText(this, "No user found with email: " + parentEmail, Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Log.d("Firestore", "Error querying user: " + task.getException().getMessage());
+                        Toast.makeText(this, "Error querying user", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    private void createAccount(String emailText, String pass, String firstName, String lastName, String userType) {
         mAuth.createUserWithEmailAndPassword(emailText, pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -125,7 +190,7 @@ public class SignUpActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
                                 String userId = user.getUid();
-                                saveUserData(userId, emailText, age, weight, height, firstName, lastName);
+                                saveUserData(userId, emailText, firstName, lastName, userType);
                                 Toast.makeText(SignUpActivity.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(SignUpActivity.this, HomePageActivity.class);
                                 startActivity(intent);
@@ -140,14 +205,12 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    private void saveUserData(String userId, String email, int age, int weight, int height, String firstName, String lastName) {
+    private void saveUserData(String userId, String email, String firstName, String lastName, String userType) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("email", email);
-        userData.put("age", age);
-        userData.put("weight", weight);
-        userData.put("height", height);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
+        userData.put("userType", userType);
 
         db.collection("users").document(userId)
                 .set(userData, SetOptions.merge())
@@ -155,6 +218,11 @@ public class SignUpActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SignUpActivity.this);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("firstName", firstName);
+                            editor.putString("userType", userType);
+                            editor.apply();
                             Log.d("Firestore", "User data added successfully");
                         } else {
                             Log.d("Firestore", "Error adding user data: " + task.getException().getMessage());
@@ -162,5 +230,4 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 });
     }
-
 }

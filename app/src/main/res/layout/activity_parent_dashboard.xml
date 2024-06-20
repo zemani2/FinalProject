@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Parent Dashboard"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:fontFamily="@font/sf_pro_display_medium"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/tvKidsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Kids"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:fontFamily="@font/sf_pro_display_regular"
+        android:layout_below="@id/tvTitle"
+        android:layout_marginTop="20dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvKids"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvKidsTitle"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/tvRequestsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join Requests"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:fontFamily="@font/sf_pro_display_regular"
+        android:layout_below="@id/rvKids"
+        android:layout_marginTop="20dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvRequests"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvRequestsTitle"
+        android:layout_marginTop="10dp" />
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+</RelativeLayout>
