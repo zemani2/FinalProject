@@ -12,14 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
@@ -51,20 +45,10 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.progressBar.setVisibility(View.GONE);
 
         // Handle acceptance button click
-        holder.btnAccept.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                acceptRequest(request, holder);
-            }
-        });
+        holder.btnAccept.setOnClickListener(v -> acceptRequest(request, holder));
 
         // Handle decline button click
-        holder.btnDecline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                declineRequest(request, holder);
-            }
-        });
+        holder.btnDecline.setOnClickListener(v -> declineRequest(request, holder));
     }
 
     private void acceptRequest(Request request, RequestViewHolder holder) {
@@ -75,80 +59,68 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         db.collection("users")
                 .whereEqualTo("email", request.getParentEmail()) // Find the parent document where email matches parentEmail
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Ensure there's exactly one document (parent) with this email
-                            if (!task.getResult().isEmpty()) {
-                                // Get the parent document
-                                DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Ensure there's exactly one document (parent) with this email
+                        if (!task.getResult().isEmpty()) {
+                            // Get the parent document
+                            DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
 
-                                // Find the kid document under this parent's "kids" subcollection
-                                db.collection("users").document(parentDoc.getId()).collection("kids")
-                                        .whereEqualTo("kidEmail", request.getKidEmail()) // Assuming kidEmail is unique
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    // Ensure there's exactly one kid document with this kidEmail
-                                                    if (!task.getResult().isEmpty()) {
-                                                        // Get the kid document
-                                                        DocumentSnapshot kidDoc = task.getResult().getDocuments().get(0);
+                            // Find the kid document under this parent's "kids" subcollection
+                            db.collection("users").document(parentDoc.getId()).collection("kids")
+                                    .whereEqualTo("kidEmail", request.getKidEmail()) // Assuming kidEmail is unique
+                                    .get()
+                                    .addOnCompleteListener(kidTask -> {
+                                        if (kidTask.isSuccessful()) {
+                                            // Ensure there's exactly one kid document with this kidEmail
+                                            if (!kidTask.getResult().isEmpty()) {
+                                                // Get the kid document
+                                                DocumentSnapshot kidDoc = kidTask.getResult().getDocuments().get(0);
 
-                                                        // Update the kid document with accepted status
-                                                        db.collection("users").document(parentDoc.getId()).collection("kids")
-                                                                .document(kidDoc.getId())
-                                                                .update("status", "accepted")
-                                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                    @Override
-                                                                    public void onSuccess(Void aVoid) {
-                                                                        // Remove the request from the local list and notify adapter
-                                                                        requestsList.remove(request);
-                                                                        notifyDataSetChanged();
+                                                // Update the kid document with accepted status
+                                                db.collection("users").document(parentDoc.getId()).collection("kids")
+                                                        .document(kidDoc.getId())
+                                                        .update("status", "accepted")
+                                                        .addOnSuccessListener(aVoid -> {
+                                                            // Remove the request from the local list and notify adapter
+                                                            requestsList.remove(request);
+                                                            notifyDataSetChanged();
 
-                                                                        // Update UI to show the newly accepted kid
-                                                                        addKidToAdapter(request);
-                                                                        notifyDataSetChanged();
+                                                            // Update UI to show the newly accepted kid
+                                                            addKidToAdapter(request);
+                                                            notifyDataSetChanged();
 
-                                                                        Toast.makeText(holder.itemView.getContext(), "Request accepted", Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                })
-                                                                .addOnFailureListener(new OnFailureListener() {
-                                                                    @Override
-                                                                    public void onFailure(@NonNull Exception e) {
-                                                                        Log.e("Firestore", "Error updating acceptance status", e);
-                                                                        Toast.makeText(holder.itemView.getContext(), "Failed to accept request", Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                });
-                                                    } else {
-                                                        Log.d("Firestore", "No kid document found with kidEmail: " + request.getKidEmail());
-                                                        Toast.makeText(holder.itemView.getContext(), "No kid document found", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                } else {
-                                                    Log.d("Firestore", "Error querying kid document: ", task.getException());
-                                                    Toast.makeText(holder.itemView.getContext(), "Error querying kid document", Toast.LENGTH_SHORT).show();
-                                                }
-
-                                                // Hide progress bar after operation completes
-                                                holder.progressBar.setVisibility(View.GONE);
+                                                            Toast.makeText(holder.itemView.getContext(), "Request accepted", Toast.LENGTH_SHORT).show();
+                                                        })
+                                                        .addOnFailureListener(e -> {
+                                                            Log.e("Firestore", "Error updating acceptance status", e);
+                                                            Toast.makeText(holder.itemView.getContext(), "Failed to accept request", Toast.LENGTH_SHORT).show();
+                                                        });
+                                            } else {
+                                                Log.d("Firestore", "No kid document found with kidEmail: " + request.getKidEmail());
+                                                Toast.makeText(holder.itemView.getContext(), "No kid document found", Toast.LENGTH_SHORT).show();
                                             }
-                                        });
-                            } else {
-                                Log.d("Firestore", "No parent document found with email: " + request.getParentEmail());
-                                Toast.makeText(holder.itemView.getContext(), "No parent document found", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Log.d("Firestore", "Error querying kid document: ", kidTask.getException());
+                                            Toast.makeText(holder.itemView.getContext(), "Error querying kid document", Toast.LENGTH_SHORT).show();
+                                        }
 
-                                // Hide progress bar on failure
-                                holder.progressBar.setVisibility(View.GONE);
-                            }
+                                        // Hide progress bar after operation completes
+                                        holder.progressBar.setVisibility(View.GONE);
+                                    });
                         } else {
-                            Log.d("Firestore", "Error querying parent document: ", task.getException());
-                            Toast.makeText(holder.itemView.getContext(), "Error querying parent document", Toast.LENGTH_SHORT).show();
+                            Log.d("Firestore", "No parent document found with email: " + request.getParentEmail());
+                            Toast.makeText(holder.itemView.getContext(), "No parent document found", Toast.LENGTH_SHORT).show();
 
                             // Hide progress bar on failure
                             holder.progressBar.setVisibility(View.GONE);
                         }
+                    } else {
+                        Log.d("Firestore", "Error querying parent document: ", task.getException());
+                        Toast.makeText(holder.itemView.getContext(), "Error querying parent document", Toast.LENGTH_SHORT).show();
+
+                        // Hide progress bar on failure
+                        holder.progressBar.setVisibility(View.GONE);
                     }
                 });
     }
@@ -161,118 +133,99 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         db.collection("users")
                 .whereEqualTo("email", request.getParentEmail()) // Find the parent document where email matches parentEmail
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Ensure there's exactly one document (parent) with this email
-                            if (!task.getResult().isEmpty()) {
-                                // Get the parent document
-                                DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Ensure there's exactly one document (parent) with this email
+                        if (!task.getResult().isEmpty()) {
+                            // Get the parent document
+                            DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
 
-                                // Find the kid document under this parent's "kids" subcollection
-                                db.collection("users").document(parentDoc.getId()).collection("kids")
-                                        .whereEqualTo("kidEmail", request.getKidEmail()) // Assuming kidEmail is unique
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    // Ensure there's exactly one kid document with this kidEmail
-                                                    if (!task.getResult().isEmpty()) {
-                                                        // Get the kid document
-                                                        DocumentSnapshot kidDoc = task.getResult().getDocuments().get(0);
+                            // Find the kid document under this parent's "kids" subcollection
+                            db.collection("users").document(parentDoc.getId()).collection("kids")
+                                    .whereEqualTo("kidEmail", request.getKidEmail()) // Assuming kidEmail is unique
+                                    .get()
+                                    .addOnCompleteListener(kidTask -> {
+                                        if (kidTask.isSuccessful()) {
+                                            // Ensure there's exactly one kid document with this kidEmail
+                                            if (!kidTask.getResult().isEmpty()) {
+                                                // Get the kid document
+                                                DocumentSnapshot kidDoc = kidTask.getResult().getDocuments().get(0);
 
-                                                        // Delete the kid document from Firestore
-                                                        db.collection("users").document(parentDoc.getId()).collection("kids")
-                                                                .document(kidDoc.getId())
-                                                                .delete()
-                                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                    @Override
-                                                                    public void onSuccess(Void aVoid) {
-                                                                        // Remove the request from the local list and notify adapter
-                                                                        requestsList.remove(request);
-                                                                        notifyDataSetChanged();
+                                                // Delete the kid document from Firestore
+                                                db.collection("users").document(parentDoc.getId()).collection("kids")
+                                                        .document(kidDoc.getId())
+                                                        .delete()
+                                                        .addOnSuccessListener(aVoid -> {
+                                                            // Remove the request from the local list and notify adapter
+                                                            requestsList.remove(request);
+                                                            notifyDataSetChanged();
 
-                                                                        Toast.makeText(holder.itemView.getContext(), "Request declined", Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                })
-                                                                .addOnFailureListener(new OnFailureListener() {
-                                                                    @Override
-                                                                    public void onFailure(@NonNull Exception e) {
-                                                                        Log.e("Firestore", "Error deleting kid document", e);
-                                                                        Toast.makeText(holder.itemView.getContext(), "Failed to decline request", Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                });
-                                                    } else {
-                                                        Log.d("Firestore", "No kid document found with kidEmail: " + request.getKidEmail());
-                                                        Toast.makeText(holder.itemView.getContext(), "No kid document found", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                } else {
-                                                    Log.d("Firestore", "Error querying kid document: ", task.getException());
-                                                    Toast.makeText(holder.itemView.getContext(), "Error querying kid document", Toast.LENGTH_SHORT).show();
-                                                }
-
-                                                // Hide progress bar after operation completes
-                                                holder.progressBar.setVisibility(View.GONE);
+                                                            Toast.makeText(holder.itemView.getContext(), "Request declined", Toast.LENGTH_SHORT).show();
+                                                        })
+                                                        .addOnFailureListener(e -> {
+                                                            Log.e("Firestore", "Error deleting kid document", e);
+                                                            Toast.makeText(holder.itemView.getContext(), "Failed to decline request", Toast.LENGTH_SHORT).show();
+                                                        });
+                                            } else {
+                                                Log.d("Firestore", "No kid document found with kidEmail: " + request.getKidEmail());
+                                                Toast.makeText(holder.itemView.getContext(), "No kid document found", Toast.LENGTH_SHORT).show();
                                             }
-                                        });
-                            } else {
-                                Log.d("Firestore", "No parent document found with email: " + request.getParentEmail());
-                                Toast.makeText(holder.itemView.getContext(), "No parent document found", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Log.d("Firestore", "Error querying kid document: ", kidTask.getException());
+                                            Toast.makeText(holder.itemView.getContext(), "Error querying kid document", Toast.LENGTH_SHORT).show();
+                                        }
 
-                                // Hide progress bar on failure
-                                holder.progressBar.setVisibility(View.GONE);
-                            }
+                                        // Hide progress bar after operation completes
+                                        holder.progressBar.setVisibility(View.GONE);
+                                    });
                         } else {
-                            Log.d("Firestore", "Error querying parent document: ", task.getException());
-                            Toast.makeText(holder.itemView.getContext(), "Error querying parent document", Toast.LENGTH_SHORT).show();
+                            Log.d("Firestore", "No parent document found with email: " + request.getParentEmail());
+                            Toast.makeText(holder.itemView.getContext(), "No parent document found", Toast.LENGTH_SHORT).show();
 
                             // Hide progress bar on failure
                             holder.progressBar.setVisibility(View.GONE);
                         }
+                    } else {
+                        Log.d("Firestore", "Error querying parent document: ", task.getException());
+                        Toast.makeText(holder.itemView.getContext(), "Error querying parent document", Toast.LENGTH_SHORT).show();
+
+                        // Hide progress bar on failure
+                        holder.progressBar.setVisibility(View.GONE);
                     }
                 });
     }
 
     private void addKidToAdapter(Request request) {
-        // Create a Kid object from the accepted request
         Kid newKid = new Kid();
         newKid.setEmail(request.getKidEmail());
 
-        // Fetch first and last name from Firestore based on kid's email
         db.collection("users")
                 .whereEqualTo("email", request.getKidEmail())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull
-                                           Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                // Assuming there's only one document matching the email
-                                String firstName = document.getString("firstName");
-                                String lastName = document.getString("lastName");
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Assuming there's only one document matching the email
+                            String firstName = document.getString("firstName");
+                            String lastName = document.getString("lastName");
 
-                                // Set first and last name to the newKid object
-                                newKid.setFirstName(firstName);
-                                newKid.setLastName(lastName);
+                            // Set first and last name to the newKid object
+                            newKid.setFirstName(firstName);
+                            newKid.setLastName(lastName);
 
-                                // Add the new kid to KidsAdapter\
-                                if (kidsAdapter != null) {
-                                    kidsAdapter.addKid(newKid);
-                                } else {
-                                    // Handle the error, maybe log it or throw an exception
-                                    Log.e("KidsAdapter", "KidsAdapter is null");
-                                }
+                            // Add the new kid to KidsAdapter
+                            if (kidsAdapter != null) {
+                                kidsAdapter.addKid(newKid);
+                            } else {
+                                // Handle the error, maybe log it or throw an exception
+                                Log.e("KidsAdapter", "KidsAdapter is null");
                             }
-                        } else {
-                            Log.d("Firestore", "Error getting documents: ", task.getException());
                         }
+                    } else {
+                        Log.d("Firestore", "Error getting documents: ", task.getException());
                     }
                 });
     }
-
 
     @Override
     public int getItemCount() {

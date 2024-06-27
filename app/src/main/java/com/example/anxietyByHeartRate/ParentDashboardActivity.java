@@ -16,7 +16,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -30,8 +29,7 @@ public class ParentDashboardActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private String parentEmail;
-    private KidsAdapter kidsAdapter = new KidsAdapter(new ArrayList<>());
-    ;
+    private KidsAdapter kidsAdapter;
     private RequestsAdapter requestsAdapter;
     private ProgressBar progressBar;
 
@@ -57,7 +55,6 @@ public class ParentDashboardActivity extends AppCompatActivity {
             parentEmail = currentUser.getEmail();
             showProgressBar();
             loadKids();
-            loadRequests();
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
         }
@@ -73,107 +70,77 @@ public class ParentDashboardActivity extends AppCompatActivity {
 
     private void loadKids() {
         db.collection("users")
-                .whereEqualTo("email", parentEmail)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                            DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
-                            fetchAcceptedKids(parentDoc.getId());
-                        } else {
-                            Log.d("Firestore", "No parent document found with email: " + parentEmail);
-                            Toast.makeText(ParentDashboardActivity.this, "No parent document found", Toast.LENGTH_SHORT).show();
-                            hideProgressBar();
-                        }
-                    }
-                });
-    }
-
-    private void fetchAcceptedKids(String parentId) {
-        db.collection("users").document(parentId).collection("kids")
+                .document(parentEmail)
+                .collection("kids")
                 .whereEqualTo("status", "accepted")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            List<String> kidsEmailsList = new ArrayList<>();
+                            List<Kid> kidsList = new ArrayList<>();
+                            List<String> kidEmails = new ArrayList<>();
+
+                            // Collect all kid emails from the parent's subcollection
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String email = document.getString("kidEmail");
                                 if (email != null) {
-                                    kidsEmailsList.add(email);
+                                    kidEmails.add(email);
                                 }
                             }
-                            fetchKidsDetails(kidsEmailsList);
+
+                            // Fetch each kid's data from the users collection using their email
+                            for (String kidEmail : kidEmails) {
+                                db.collection("users")
+                                        .whereEqualTo("email", kidEmail)
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> kidTask) {
+                                                if (kidTask.isSuccessful() && !kidTask.getResult().isEmpty()) {
+                                                    QueryDocumentSnapshot kidDocument = (QueryDocumentSnapshot) kidTask.getResult().getDocuments().get(0);
+                                                    String firstName = kidDocument.getString("firstName");
+                                                    String lastName = kidDocument.getString("lastName");
+                                                    if (firstName != null && lastName != null) {
+                                                        Kid kid = new Kid(kidEmail, firstName, lastName);
+                                                        kidsList.add(kid);
+                                                    }
+                                                }
+
+                                                // Check if this is the last kid to process
+                                                if (kidEmail.equals(kidEmails.get(kidEmails.size() - 1))) {
+                                                    updateKidsAdapter(kidsList);
+                                                    loadRequests();
+                                                }
+                                            }
+                                        });
+                            }
+
+                            if (kidEmails.isEmpty()) {
+                                // No kids to process, update adapter directly
+                                updateKidsAdapter(kidsList);
+                            }
+
                         } else {
-                            Log.d("Firestore", "Error getting kids emails: ", task.getException());
-                            Toast.makeText(ParentDashboardActivity.this, "Error getting kids emails", Toast.LENGTH_SHORT).show();
+                            Log.d("Firestore", "Error getting accepted kids: ", task.getException());
+                            Toast.makeText(ParentDashboardActivity.this, "Error getting accepted kids", Toast.LENGTH_SHORT).show();
                             hideProgressBar();
                         }
                     }
                 });
     }
 
-    private void fetchKidsDetails(List<String> kidsEmailsList) {
-        if (kidsEmailsList.isEmpty()) {
-            rvKids.setAdapter(kidsAdapter);
-            hideProgressBar();
-            return;
-        }
 
-        List<Kid> kidsList = new ArrayList<>();
-        for (String email : kidsEmailsList) {
-            db.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    String email = document.getString("email");
-                                    String firstName = document.getString("firstName");
-                                    String lastName = document.getString("lastName");
-                                    if (email != null && firstName != null && lastName != null) {
-                                        Kid kid = new Kid(email, firstName, lastName);
-                                        kidsList.add(kid);
-                                    }
-                                }
-                                kidsAdapter = new KidsAdapter(kidsList);
-                                rvKids.setAdapter(kidsAdapter);
-                                hideProgressBar();
-                            } else {
-                                Log.d("Firestore", "Error getting kids: ", task.getException());
-                                Toast.makeText(ParentDashboardActivity.this, "Error getting kids details", Toast.LENGTH_SHORT).show();
-                                hideProgressBar();
-                            }
-                        }
-                    });
-        }
+    private void updateKidsAdapter(List<Kid> kidsList) {
+        kidsAdapter = new KidsAdapter(kidsList);
+        rvKids.setAdapter(kidsAdapter);
+        hideProgressBar();
     }
 
     private void loadRequests() {
         db.collection("users")
-                .whereEqualTo("email", parentEmail)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                            DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
-                            fetchPendingRequests(parentDoc.getId());
-                        } else {
-                            Log.d("Firestore", "No parent document found with email: " + parentEmail);
-                            Toast.makeText(ParentDashboardActivity.this, "No parent document found", Toast.LENGTH_SHORT).show();
-                            hideProgressBar();
-                        }
-                    }
-                });
-    }
-
-    private void fetchPendingRequests(String parentId) {
-        db.collection("users").document(parentId).collection("kids")
+                .document(parentEmail)
+                .collection("kids")
                 .whereEqualTo("status", "pending")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -187,19 +154,20 @@ public class ParentDashboardActivity extends AppCompatActivity {
                                 if (kidEmail != null && status != null) {
                                     Request request = new Request(kidEmail, status, false, parentEmail);
                                     requestsList.add(request);
-                                } else {
-                                    Log.d("Firestore", "Missing kidEmail or status field in document");
                                 }
                             }
-                            requestsAdapter = new RequestsAdapter(requestsList, db, kidsAdapter);
-                            rvRequests.setAdapter(requestsAdapter);
-                            hideProgressBar();
+                            updateRequestsAdapter(requestsList);
                         } else {
-                            Log.d("Firestore", "Error getting requests: ", task.getException());
-                            Toast.makeText(ParentDashboardActivity.this, "Error getting requests", Toast.LENGTH_SHORT).show();
-                            hideProgressBar();
+                            Log.d("Firestore", "Error getting pending requests: ", task.getException());
+                            Toast.makeText(ParentDashboardActivity.this, "Error getting pending requests", Toast.LENGTH_SHORT).show();
                         }
+                        hideProgressBar();
                     }
                 });
+    }
+
+    private void updateRequestsAdapter(List<Request> requestsList) {
+        requestsAdapter = new RequestsAdapter(requestsList, db, kidsAdapter);
+        rvRequests.setAdapter(requestsAdapter);
     }
 }

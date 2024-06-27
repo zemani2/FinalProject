@@ -130,39 +130,25 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-
     private void sendParentRequest(String parentEmail, String kidEmail) {
-        // Check if parentEmail is valid and current user is authenticated
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Query Firestore to find the parent user document using parentEmail
-        db.collection("users")
+         db.collection("users")
                 .whereEqualTo("email", parentEmail)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Ensure there is exactly one matching document
                         if (task.getResult() != null && !task.getResult().isEmpty()) {
-                            // Assuming parentEmail is unique and there's only one match
                             DocumentSnapshot parentDoc = task.getResult().getDocuments().get(0);
-                            String parentId = parentDoc.getId(); // Get the parent's userId
+                            String parentId = parentDoc.getId();
 
-                            // Create a request object
                             Map<String, Object> request = new HashMap<>();
                             request.put("kidEmail", kidEmail);
                             request.put("status", "pending");
 
-                            // Add the request under the parent's document in Firestore
                             db.collection("users").document(parentId).collection("kids").document(kidEmail)
                                     .set(request, SetOptions.merge())
                                     .addOnCompleteListener(innerTask -> {
                                         if (innerTask.isSuccessful()) {
                                             Log.d("Firestore", "Parent request sent successfully");
-                                            // Optionally, notify the parent or update UI
                                             Toast.makeText(this, "Parent request sent successfully", Toast.LENGTH_SHORT).show();
                                         } else {
                                             Log.d("Firestore", "Error sending parent request: " + innerTask.getException().getMessage());
@@ -180,7 +166,6 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-
     private void createAccount(String emailText, String pass, String firstName, String lastName, String userType) {
         mAuth.createUserWithEmailAndPassword(emailText, pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -189,8 +174,7 @@ public class SignUpActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
-                                String userId = user.getUid();
-                                saveUserData(userId, emailText, firstName, lastName, userType);
+                                saveUserData(emailText, firstName, lastName, userType);
                                 Toast.makeText(SignUpActivity.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(SignUpActivity.this, HomePageActivity.class);
                                 startActivity(intent);
@@ -205,14 +189,14 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    private void saveUserData(String userId, String email, String firstName, String lastName, String userType) {
+    private void saveUserData(String email, String firstName, String lastName, String userType) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
         userData.put("userType", userType);
 
-        db.collection("users").document(userId)
+        db.collection("users").document(email)
                 .set(userData, SetOptions.merge())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override

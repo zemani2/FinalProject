@@ -24,9 +24,6 @@ public class LoginActivity extends AppCompatActivity {
     Button btnlogin;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private static final int REQUEST_CODE_AUTH = 1001;
-
-    private static final String TAG = "OAuthLoginActivity";
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -58,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            String userId = mAuth.getCurrentUser().getUid();
+                            String userId = mAuth.getCurrentUser().getEmail(); // Using email as UID
                             // Fetch user details from Firestore
                             db.collection("users").document(userId).get().addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
@@ -92,13 +89,4 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//        super.onNewIntent(intent);
-//        setIntent(intent);
-//        handleOAuthCallback(intent);
-//    }
-
-
 }

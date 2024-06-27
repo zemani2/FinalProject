@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -51,19 +52,13 @@ public class HomePageActivity extends AppCompatActivity {
             usernameTextView.setText("Welcome, " + cachedFirstName + "!");
         }
 
-        if ("parent".equals(cachedUserType)) {
-            Log.d("HomePageActivity", "User Type is: " + cachedUserType);
-
-            myKidsButton.setVisibility(View.VISIBLE);
-        }
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            String userId = currentUser.getUid();
+            String userEmail = currentUser.getEmail();
             loadingIndicator.setVisibility(View.VISIBLE); // Show loading indicator
 
             db.collection("users")
-                    .document(userId)
+                    .document(userEmail)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
@@ -78,14 +73,14 @@ public class HomePageActivity extends AppCompatActivity {
                                         usernameTextView.setText("Welcome, " + firstName + "!");
                                         prefs.edit().putString("firstName", firstName).apply();
                                     } else {
-                                        Log.d("HomePageActivity", "No first name found for user with ID: " + userId);
+                                        Log.d("HomePageActivity", "No first name found for user with email: " + userEmail);
                                     }
                                     if ("parent".equals(userType)) {
                                         myKidsButton.setVisibility(View.VISIBLE);
                                         prefs.edit().putString("userType", userType).apply();
                                     }
                                 } else {
-                                    Log.d("HomePageActivity", "No such document found for user with ID: " + userId);
+                                    Log.d("HomePageActivity", "No such document found for user with email: " + userEmail);
                                 }
                             } else {
                                 Log.e("HomePageActivity", "Error getting user document", task.getException());
@@ -118,6 +113,21 @@ public class HomePageActivity extends AppCompatActivity {
             Intent historyIntent = new Intent(HomePageActivity.this, HistoryActivity.class);
             startActivity(historyIntent);
         });
+        // Handle back button press using OnBackPressedCallback
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                // Handle back button press here
+                // For example, prevent default behavior:
+                // super.handleOnBackPressed();
+
+                // Or implement custom behavior
+                // For example, show a dialog or take specific action
+            }
+        };
+
+        // Register the callback
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     private void logoutUser() {

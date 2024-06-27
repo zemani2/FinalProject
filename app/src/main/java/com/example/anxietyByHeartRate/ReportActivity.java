@@ -15,13 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,31 +49,33 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     private void loadKidNames() {
-        String currentUserUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        final String[] firstName = {""};
-        final String[] lastName = {""};
+        String currentUserEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
-        db.collection("users").document(currentUserUid).collection("kids")
+        db.collection("users")
+                .document(currentUserEmail)
+                .collection("kids")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        kidEmails = new ArrayList<>();
-                        kidNames = new ArrayList<>();
+                        kidEmails.clear();
+                        kidNames.clear();
                         for (DocumentSnapshot document : task.getResult()) {
                             String kidEmail = document.getString("kidEmail");
-                            db.collection("users")
-                                    .whereEqualTo("email", kidEmail)
-                                    .get()
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                                    firstName[0] = document.getString("firstName");
-                                                    lastName[0] = document.getString("lastName");
+                            if (kidEmail != null) {
+                                db.collection("users")
+                                        .whereEqualTo("email", kidEmail)
+                                        .get()
+                                        .addOnCompleteListener(kidTask -> {
+                                            if (kidTask.isSuccessful()) {
+                                                for (DocumentSnapshot kidDocument : kidTask.getResult()) {
+                                                    String firstName = kidDocument.getString("firstName");
+                                                    String lastName = kidDocument.getString("lastName");
+                                                    if (firstName != null && lastName != null) {
+                                                        String fullName = firstName + " " + lastName;
+                                                        kidNames.add(fullName);
+                                                        kidEmails.add(kidEmail);
+                                                    }
                                                 }
-                                                kidEmails.add(kidEmail);
-                                                kidNames.add(firstName[0] + " " + lastName[0]);
                                                 if (adapter == null) {
                                                     adapter = new KidAdapter(kidNames);
                                                     recyclerView.setAdapter(adapter);
@@ -98,10 +96,10 @@ public class ReportActivity extends AppCompatActivity {
                                                     adapter.notifyDataSetChanged();
                                                 }
                                             } else {
-                                                Log.d("Firestore", "Error getting documents: ", task.getException());
+                                                Log.d("Firestore", "Error getting kid documents: ", kidTask.getException());
                                             }
-                                        }
-                                    });
+                                        });
+                            }
                         }
                     } else {
                         Toast.makeText(ReportActivity.this, "Failed to load kid names: " + task.getException(), Toast.LENGTH_SHORT).show();
@@ -111,33 +109,23 @@ public class ReportActivity extends AppCompatActivity {
 
     private void loadStressData() {
         db.collection("users")
-                .whereEqualTo("email", selectedKidEmail)
+                .document(selectedKidEmail)
+                .collection("stressData")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        if (!task.getResult().isEmpty()) {
-                            DocumentSnapshot userDoc = task.getResult().getDocuments().get(0);
-
-                            db.collection("users").document(userDoc.getId()).collection("stressData")
-                                    .get()
-                                    .addOnCompleteListener(stressDataTask -> {
-                                        if (stressDataTask.isSuccessful()) {
-                                            List<String> stressHours = new ArrayList<>();
-                                            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                            for (DocumentSnapshot document : stressDataTask.getResult()) {
-                                                String timestamp = document.getString("timeStamp");
-                                                stressHours.add(timestamp);
-                                            }
-
-                                            StressListAdapter adapter = new StressListAdapter(stressHours);
-                                            stressHoursListView.setAdapter(adapter);
-                                        } else {
-                                            Log.d("Firestore", "Error getting stressData documents: ", stressDataTask.getException());
-                                        }
-                                    });
-                        } else {
-                            Log.d("Firestore", "Error getting documents: ", task.getException());
+                        List<String> stressHours = new ArrayList<>();
+                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String timestamp = document.getString("timeStamp");
+                            if (timestamp != null) {
+                                stressHours.add(timestamp);
+                            }
                         }
+                        StressListAdapter adapter = new StressListAdapter(stressHours);
+                        stressHoursListView.setAdapter(adapter);
+                    } else {
+                        Log.d("Firestore", "Error getting stressData documents: ", task.getException());
                     }
                 });
     }

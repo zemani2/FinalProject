@@ -13,6 +13,4 @@
 </string>
     <string name="CONSUMER_SECRET">zx7Wlh4sxWCWnR0o5mUf67SAIZ4KidWSV4M</string>
     <string name="heart_rate">Heart Rate: %1$d bpm</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
