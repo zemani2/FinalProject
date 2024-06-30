@@ -13,6 +13,7 @@
         android:layout_height="100dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="32dp"
+        android:layout_marginTop="20dp"
         android:src="@drawable/ic_user" />
 
     <TextView
@@ -30,6 +31,7 @@
         android:id="@+id/fragmentContainerView"
         android:name="com.example.anxietyByHeartRate.InfoFragment"
         android:layout_width="match_parent"
-        android:layout_height="277dp" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"/>
 
 </LinearLayout>

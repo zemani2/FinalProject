@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
-
 public class KidsAdapter extends RecyclerView.Adapter<KidsAdapter.KidViewHolder> {
     private List<Kid> kidsList;
 
@@ -39,6 +38,11 @@ public class KidsAdapter extends RecyclerView.Adapter<KidsAdapter.KidViewHolder>
     public void addKid(Kid kid) {
         kidsList.add(kid);
         notifyItemInserted(kidsList.size() - 1); // Notify adapter that an item was inserted at the last position
+    }
+
+    public void updateKidsList(List<Kid> newKidsList) {
+        this.kidsList = newKidsList;
+        notifyDataSetChanged(); // Notify adapter that the data set has changed
     }
 
     static class KidViewHolder extends RecyclerView.ViewHolder {
