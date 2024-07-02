@@ -38,8 +38,6 @@ public class InfoFragment extends Fragment {
     private String parentEmail;
 
     private TextView firstNameTextView, lastNameTextView;
-    private int weight;
-    private int height;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -137,9 +135,17 @@ public class InfoFragment extends Fragment {
                         DocumentSnapshot document = task.getResult();
                         if (document != null && document.exists()) {
                             firstNameTextView = view.findViewById(R.id.firstNameTextView);
-                            firstNameTextView.setText("First Name: "+ document.getString("firstName"));
+                            firstNameTextView.setText("First Name: " + document.getString("firstName"));
                             lastNameTextView = view.findViewById(R.id.lastNameTextView);
-                            lastNameTextView.setText("Last Name: "+ document.getString("lastName"));
+                            lastNameTextView.setText("Last Name: " + document.getString("lastName"));
+
+                            String userType = document.getString("userType");
+                            if ("parent".equals(userType)) {
+                                tvKidsTitle.setVisibility(View.VISIBLE);
+                                rvKids.setVisibility(View.VISIBLE);
+                                showProgressBar();
+                                loadKids(parentEmail);
+                            }
                         } else {
                             Log.d("Firestore", "No such document");
                         }
@@ -170,8 +176,6 @@ public class InfoFragment extends Fragment {
         if (currentUser != null) {
             parentEmail = currentUser.getEmail();
             updateNameView(view, parentEmail);
-            showProgressBar();
-            loadKids(parentEmail);
         }
 
         ImageButton editButton = view.findViewById(R.id.editButton);
@@ -186,6 +190,7 @@ public class InfoFragment extends Fragment {
 
         return view;
     }
+
     public void updateData(String firstName, String lastName) {
         if (firstNameTextView != null) {
             firstNameTextView.setText(firstName);

@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -23,7 +23,7 @@ public class EditFragment extends Fragment {
     private Button saveButton;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private TextView firstNameEditText, lastNameEditText;
+    private EditText firstNameEditText, lastNameEditText;
     private String firstName, lastName;
     public EditFragment() {
         // Required empty public constructor
@@ -49,8 +49,8 @@ public class EditFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            String userId = currentUser.getUid();
-            db.collection("users").document(userId)
+            String userEmail = currentUser.getEmail();
+            db.collection("users").document(userEmail)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
@@ -61,7 +61,7 @@ public class EditFragment extends Fragment {
                         }
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Failed to load data", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getContext(), "Failed to load data", Toast.LENGTH_SHORT).show();
                     });
         }
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -70,9 +70,8 @@ public class EditFragment extends Fragment {
                 // Save the data to Firestore
                 firstName = firstNameEditText.getText().toString();
                 lastName = lastNameEditText.getText().toString();
-                saveUserData(firstName, lastName, currentUser.getUid());
+                saveUserData(firstName, lastName, currentUser.getEmail());
 
-                Toast.makeText(getContext(), "Data saved successfully", Toast.LENGTH_SHORT).show();
                 ((OnDataSavedListener) requireActivity()).onDataSaved(firstName, lastName);
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
@@ -82,18 +81,22 @@ public class EditFragment extends Fragment {
     }
 
     // Method to save user data to Firestore
-    private void saveUserData(String firstName, String lastName, String userId) {
+    private void saveUserData(String firstName, String lastName, String userEmail) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
 
-        db.collection("users").document(userId)
+        db.collection("users").document(userEmail)
                 .update(userData)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Data saved successfully", Toast.LENGTH_SHORT).show();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), "Data saved successfully", Toast.LENGTH_SHORT).show();
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "ERROR: Data wasn't saved", Toast.LENGTH_SHORT).show();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), "ERROR: Data wasn't saved", Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 

@@ -1,39 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <!-- Label for selecting kid -->
     <TextView
-        android:id="@+id/kidsNamesLabel"
+        android:id="@+id/reportTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose a Kid to View:"
-        android:textSize="18sp"
+        android:textSize="34sp"
         android:textStyle="bold"
-        android:fontFamily="@font/sf_pro_display_medium"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="@color/apple_dark_gray"
+        android:text="Reports"
+        android:fontFamily="@font/sf_pro_display_regular"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"/>
+    <!-- Label for selecting kid -->
 
-    <!-- RecyclerView for kid names -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/kidNamesRecyclerView"
-        android:layout_below="@id/kidsNamesLabel"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"/>
+        android:id="@+id/kidsSelectLayout"
+        android:layout_marginTop="20dp"
+        android:layout_below="@id/reportTextView"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/kidsNamesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/sf_pro_display_medium"
+            android:text="Choose Kid:"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/kidNamesSpinner"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="16dp" />
+    </LinearLayout>
+
+    <!-- Button to open DatePickerDialog -->
+
+    <Button
+        android:id="@+id/datePickerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/kidsSelectLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/black"
+        android:drawableRight="@drawable/ic_calendar"
+        android:fontFamily="@font/sf_pro_display_regular"
+        android:text="Choose Date" />
 
     <!-- Label for Stress Hours -->
     <TextView
         android:id="@+id/stressHoursLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/kidNamesRecyclerView"
+        android:layout_below="@id/datePickerButton"
         android:text="Stress Hours"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -42,7 +74,21 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="8dp"/>
-
+    <TextView
+        android:id="@+id/noDataLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/stressHoursLabel"
+        android:text="No data for the choosen date"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/sf_pro_display_medium"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
     <!-- ListView for displaying stress hours -->
     <ListView
         android:id="@+id/stressHoursListView"

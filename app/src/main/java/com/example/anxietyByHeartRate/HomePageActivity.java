@@ -38,7 +38,6 @@ public class HomePageActivity extends AppCompatActivity {
         TextView usernameTextView = findViewById(R.id.usernameTextView);
         Button myInfoButton = findViewById(R.id.myInfoButton);
         Button reportsButton = findViewById(R.id.reportsButton);
-        Button historyButton = findViewById(R.id.historyButton);
         Button myKidsButton = findViewById(R.id.myKidsButton);
         ImageButton logoutButton = findViewById(R.id.logoutButton);
         loadingIndicator = findViewById(R.id.loadingIndicator);
@@ -109,10 +108,7 @@ public class HomePageActivity extends AppCompatActivity {
 
         logoutButton.setOnClickListener(v -> logoutUser());
 
-        historyButton.setOnClickListener(v -> {
-            Intent historyIntent = new Intent(HomePageActivity.this, HistoryActivity.class);
-            startActivity(historyIntent);
-        });
+
         // Handle back button press using OnBackPressedCallback
         OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
             @Override
