@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <TextView
         android:id="@+id/reportTextView"
         android:layout_width="wrap_content"
@@ -24,7 +25,7 @@
 
         <TextView
             android:id="@+id/kidsNamesLabel"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
@@ -39,65 +40,133 @@
             android:id="@+id/kidNamesSpinner"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
+            android:backgroundTint="@android:color/holo_blue_dark"
             android:layout_marginBottom="16dp" />
     </LinearLayout>
-
-    <!-- Button to open DatePickerDialog -->
-
-    <Button
-        android:id="@+id/datePickerButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/kidsSelectLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/black"
-        android:drawableRight="@drawable/ic_calendar"
-        android:fontFamily="@font/sf_pro_display_regular"
-        android:text="Choose Date" />
-
-    <!-- Label for Stress Hours -->
-    <TextView
-        android:id="@+id/stressHoursLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/datePickerButton"
-        android:text="Stress Hours"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:fontFamily="@font/sf_pro_display_medium"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="8dp"/>
-    <TextView
-        android:id="@+id/noDataLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/stressHoursLabel"
-        android:text="No data for the choosen date"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:fontFamily="@font/sf_pro_display_medium"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="8dp"
-        android:layout_centerHorizontal="true"
-        android:visibility="gone"/>
-    <!-- ListView for displaying stress hours -->
-    <ListView
-        android:id="@+id/stressHoursListView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/stressHoursLabel"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:padding="16dp" />
+        android:id="@+id/selectDaysLayout"
+        android:layout_marginTop="20dp"
+        android:layout_below="@id/kidsSelectLayout"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/selectedDaysLabel"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="Selected Date:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/sf_pro_display_medium"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/datePickerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:drawableRight="@drawable/ic_calendar"
+            android:fontFamily="@font/sf_pro_display_regular"
+            android:text="Choose Date" />
+    </LinearLayout>
+    <!-- Button to open DatePickerDialog -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/menuBarCard"
+        android:layout_below="@+id/selectDaysLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"><!-- Apply the outline blue frame drawable here -->
+        <LinearLayout
+            android:id="@+id/menuContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/selectDaysLayout"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/buttonStressReport"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:textSize="8pt"
+                android:layout_marginRight="5dp"
+                android:fontFamily="@font/sf_pro_display_semi_bold_italic"
+
+                android:textColor="@android:color/holo_blue_dark"
+                android:background="@android:color/transparent"
+                android:text="Stress" />
+
+            <Button
+                android:id="@+id/buttonMapReport"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:textSize="8pt"
+                android:fontFamily="@font/sf_pro_display_semi_bold_italic"
+                android:layout_marginRight="5dp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:background="@android:color/transparent"
+                android:text="Locations" />
+            <Button
+                android:id="@+id/buttonSleepReport"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:textSize="8pt"
+                android:fontFamily="@font/sf_pro_display_semi_bold_italic"
+                android:textColor="@android:color/holo_blue_dark"
+                android:background="@android:color/transparent"
+                android:text="Sleep" />
+
+            -->
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_below="@id/menuBarCard"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <!-- Label for Stress Hours -->
+
+<!--    <TextView-->
+<!--        android:id="@+id/noDataLabel"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@id/stressHoursLabel"-->
+<!--        android:text="No data for the choosen date"-->
+<!--        android:textSize="18sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:fontFamily="@font/sf_pro_display_medium"-->
+<!--        android:layout_marginTop="24dp"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:layout_marginEnd="20dp"-->
+<!--        android:layout_marginBottom="8dp"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:visibility="gone"/>-->
+<!--    &lt;!&ndash; ListView for displaying stress hours &ndash;&gt;-->
+<!--    <ListView-->
+<!--        android:id="@+id/stressHoursListView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@id/stressHoursLabel"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:layout_marginEnd="20dp"-->
+<!--        android:padding="16dp" />-->
 
 </RelativeLayout>

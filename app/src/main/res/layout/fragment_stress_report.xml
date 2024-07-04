@@ -1,0 +1,46 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Label for Stress Hours -->
+    <TextView
+        android:id="@+id/stressHoursLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stress Hours"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/sf_pro_display_medium"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/noDataLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/stressHoursLabel"
+        android:text="No data for the chosen date"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/sf_pro_display_medium"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+    <!-- ListView for displaying stress hours -->
+    <ListView
+        android:id="@+id/stressHoursListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/stressHoursLabel"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:padding="16dp" />
+
+</RelativeLayout>
