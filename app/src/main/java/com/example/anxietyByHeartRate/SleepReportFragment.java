@@ -104,11 +104,10 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
                 Color.parseColor("#9467bd")});
         PieData pieData = new PieData(dataSet);
         dataSet.setDrawValues(false);
-
+        pieChart.setEntryLabelTextSize(0);
         pieChart.setData(pieData);
-        pieChart.setUsePercentValues(false);
-        pieChart.setDrawHoleEnabled(false);
-        pieChart.getDescription().setEnabled(false); // Disable description text
+        pieChart.setUsePercentValues(true);
+        pieChart.setDrawHoleEnabled(true);
 
         pieChart.invalidate(); // refresh
     }
@@ -124,7 +123,10 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
         dataSet.setColors(new int[]{Color.parseColor("#1f77b4"),
                 Color.parseColor("#2ca02c"),
                 Color.parseColor("#ff7f0e"),
-                Color.parseColor("#9467bd")});        PieData pieData = new PieData(dataSet);
+                Color.parseColor("#9467bd")});
+        PieData pieData = new PieData(dataSet);
+        pieChart.setCenterText("Sleep Quality");
+        pieChart.setEntryLabelTextSize(0);
         pieChart.setData(pieData);
         pieChart.setUsePercentValues(true);
         pieChart.setDrawHoleEnabled(true);
