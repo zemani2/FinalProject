@@ -1,7 +1,9 @@
 package com.example.anxietyByHeartRate;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -14,6 +16,8 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,6 +27,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class HomePageActivity extends AppCompatActivity {
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private ProgressBar loadingIndicator;
@@ -71,6 +77,8 @@ public class HomePageActivity extends AppCompatActivity {
                                     if (firstName != null) {
                                         usernameTextView.setText("Welcome, " + firstName + "!");
                                         prefs.edit().putString("firstName", firstName).apply();
+                                        startLocationService(); // Start location service after sign-in
+
                                     } else {
                                         Log.d("HomePageActivity", "No first name found for user with email: " + userEmail);
                                     }
@@ -121,7 +129,12 @@ public class HomePageActivity extends AppCompatActivity {
                 // For example, show a dialog or take specific action
             }
         };
-
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        }
         // Register the callback
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
@@ -132,5 +145,9 @@ public class HomePageActivity extends AppCompatActivity {
         loginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginIntent);
         finish();
+    }
+    private void startLocationService() {
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        ContextCompat.startForegroundService(this, serviceIntent);
     }
 }

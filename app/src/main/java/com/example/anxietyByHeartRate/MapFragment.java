@@ -96,7 +96,7 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
 
                                     // Extract the date and time
                                     String date = parts[0];
-                                    date = date.substring(0,4) + date.substring(7) + date.substring(4,7);
+//                                    date = date.substring(0,4) + date.substring(7) + date.substring(4,7);
                                     String time = parts[1].substring(0, 5); // This will give you the hour and minute (HH:mm)
                                     if (date.equals(selectedDate)) {
                                         GeoPoint location = new GeoPoint(locationLatE7 / 1e7, locationLngE7 / 1e7);

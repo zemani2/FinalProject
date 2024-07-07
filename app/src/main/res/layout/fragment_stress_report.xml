@@ -7,7 +7,7 @@
         android:id="@+id/stressHoursLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stress Hours"
+        android:text="Stress Events"
         android:textSize="18sp"
         android:textStyle="bold"
         android:fontFamily="@font/sf_pro_display_medium"
@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/stressHoursLabel"
-        android:text="No data for the chosen date"
+        android:text="No stress events for the chosen date"
         android:textSize="18sp"
         android:textStyle="bold"
         android:fontFamily="@font/sf_pro_display_medium"
@@ -32,15 +32,15 @@
         android:layout_centerHorizontal="true"
         android:visibility="gone"/>
 
-    <!-- ListView for displaying stress hours -->
-    <ListView
-        android:id="@+id/stressHoursListView"
+    <!-- BarChart for displaying stress events -->
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/stressEventsChart"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/stressHoursLabel"
-        android:layout_marginTop="8dp"
+        android:layout_height="300dp"
+        android:layout_below="@id/noDataLabel"
+        android:layout_marginTop="16dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:padding="16dp" />
+        android:layout_marginBottom="20dp" />
 
 </RelativeLayout>

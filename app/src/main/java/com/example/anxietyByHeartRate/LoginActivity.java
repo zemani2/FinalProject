@@ -47,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
                 signIn(email, pass);
             }
         });
+
     }
 
     private void signIn(String email, String password) {
@@ -89,4 +90,5 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }

@@ -2,6 +2,7 @@ package com.example.anxietyByHeartRate;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -23,10 +25,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class ReportActivity extends AppCompatActivity {
@@ -62,13 +68,27 @@ public class ReportActivity extends AppCompatActivity {
         buttonStressReport.setOnClickListener(v -> loadStressDataFragment());
         buttonMapReport.setOnClickListener(v -> loadMapDataFragment());
         buttonSleepReport.setOnClickListener(v -> loadSleepReportFragment());
-
+        ImageButton backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         setDefaultDate();
         loadKidNames();
         restoreFragmentState();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(this, HomePageActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
+    }
     private void setDefaultDate() {
         final Calendar calendar = Calendar.getInstance();
         String year = Integer.toString(calendar.get(Calendar.YEAR));
@@ -98,8 +118,22 @@ public class ReportActivity extends AppCompatActivity {
                     updateFragmentsOnDateChanged(selectedDate);
                     },
                 year, month, day);
-        datePickerDialog.show();
-    }
+// Set the initial date to the last selected date if available
+        if (selectedDate != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = sdf.parse(selectedDate);
+                if (date != null) {
+                    calendar.setTime(date);
+                    datePickerDialog.updateDate(calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        datePickerDialog.show();    }
 
     private void loadStressDataFragment() {
         StressReportFragment fragment = StressReportFragment.newInstance(selectedKidEmail, selectedDate);

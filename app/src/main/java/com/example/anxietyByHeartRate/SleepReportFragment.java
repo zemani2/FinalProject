@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,7 +36,8 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
     private float remSleepSeconds;
     private float awakeSleepSeconds;
     private FirebaseFirestore db;
-    private PieChart pieChartTotalSleep ;
+    private ImageView batteryView;
+    private TextView batteryTextView;
     private PieChart pieChartSleepQuality;
     public static SleepReportFragment newInstance(String selectedKidEmail, String selectedDate) {
         SleepReportFragment fragment = new SleepReportFragment();
@@ -54,7 +57,8 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
         }
         db = FirebaseFirestore.getInstance();
         // Get the PieChart views
-        pieChartTotalSleep = view.findViewById(R.id.pieChartTotalSleep);
+        batteryView = view.findViewById(R.id.batteryView);
+        batteryTextView = view.findViewById(R.id.batteryTextView);
         pieChartSleepQuality = view.findViewById(R.id.pieChartSleepQuality);
         loadSleepData();
 
@@ -76,8 +80,9 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
                                 lightSleepSeconds = document.getLong("light_sleep_seconds");
                                 remSleepSeconds = document.getLong("rem_sleep_seconds");
                                 awakeSleepSeconds = document.getLong("awake_sleep_seconds");
-                                // Setup total sleep time chart
-                                setupTotalSleepChart(pieChartTotalSleep);
+
+                                updateBatteryView(deepSleepSeconds+lightSleepSeconds+remSleepSeconds);
+
 
                                 // Setup sleep quality chart
                                 setupSleepQualityChart(pieChartSleepQuality);
@@ -87,6 +92,19 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
                         Log.d("Firestore", "Error getting stressData documents: ", task.getException());
                     }
                 });
+    }
+    private void updateBatteryView(float totalSleepTime) {
+        int hours = (int) (totalSleepTime / 3600);
+        int minuets = (int) (totalSleepTime % 3600 / 60);
+        batteryView.setVisibility(View.VISIBLE);
+        batteryTextView.setText("Total amount of sleep: " + hours +":"+minuets+" hours");
+        if (totalSleepTime < 21600) { // 7 hours (low)
+            batteryView.setImageResource(R.drawable.ic_low_battery);
+        } else if (totalSleepTime < 25200) {
+            batteryView.setImageResource(R.drawable.ic_med_battery);
+        } else {
+            batteryView.setImageResource(R.drawable.ic_high_battery);
+        }
     }
     private void setupTotalSleepChart(PieChart pieChart) {
         float totalSleepTime = deepSleepSeconds + lightSleepSeconds + remSleepSeconds + awakeSleepSeconds;
@@ -145,6 +163,10 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
         // Update fragment view based on new selected kid
         this.selectedDate = selectedDate;
         // Call a method to refresh your UI with new selectedKidEmail
+
+        batteryView.setVisibility(View.GONE);
+        batteryTextView.setText("No data to display");
+        pieChartSleepQuality.clear();
         loadSleepData();
     }
 
@@ -152,6 +174,9 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
     public void onKidSelected(String selectedKidEmail) {
         // Update fragment view based on new selected kid
         this.selectedKidEmail = selectedKidEmail;
+        batteryView.setVisibility(View.GONE);
+        batteryTextView.setText("No data to display");
+        pieChartSleepQuality.clear();
         // Call a method to refresh your UI with new selectedKidEmail
         loadSleepData();
 
