@@ -96,7 +96,7 @@ Simulate data inputs: Use Garmin devices to collect HRV and other physiological 
 Trigger anomalies: Create scenarios with abnormal data patterns (e.g., disrupted sleep).
 Verify alerts: Check that the app sends alerts when significant stress indicators are detected.
 
-![App Image](file:///Users/shirad/Downloads/combined_image_with_larger_space.jpg)
+![App Image](app_image.jpg)
 
 ## 🚀 Deployment
 For live deployment:
