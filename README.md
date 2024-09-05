@@ -15,6 +15,7 @@
 - [Built With](#built-with)
 - [Acknowledgments](#acknowledgments)
 
+
 ## 👥 The Team 
 **Team Members**
 - [Shira Dahan](shira.dahan@mail.huji.ac.il)
@@ -25,13 +26,14 @@
 
 
 ## 📚 Project Description
-The project aims to address the pressing issue of undetected anxiety and stress in children by leveraging smartwatch technology integrated with advanced AI algorithms. It detects and alerts parents in real-time when their child experiences heightened levels of anxiety, enabling timely intervention and support. By utilizing the smartwatch's sensors, particularly heart rate data, the system identifies patterns indicative of stress or anxiety episodes, offering proactive insights into the child's mental well-being.
-## Features and Functionalities
-- **Real-time Anxiety Detection**: Continuously monitors the child's heart rate to detect fluctuations indicating heightened stress or anxiety levels.
-- **Parental Alerts**: Instant notifications on parents' smartphones when significant changes in their child's stress levels are detected.
-- **Customized Intervention**: Allows parents to provide tailored support and intervention based on real-time insights into their child's mental state.
-- **User-friendly Interface**: Offers a simple and intuitive interface for both children and parents, ensuring ease of use and accessibility.
-- **Data Analysis**: Advanced AI algorithms analyze heart rate data to identify patterns and trends related to anxiety, facilitating deeper understanding and proactive management.
+The "AI-Enhanced Anomaly Detection for Children" project focuses on improving children's mental health by using wearable technology and machine learning to detect physiological anomalies correlated with stress and anxiety. The system primarily uses heart rate variability (HRV), sleep patterns, and behavioral data from smartwatches to identify potential anxiety-inducing events. It provides timely alerts to parents through a mobile application, allowing for personalized interventions that can improve a child's well-being.
+
+## Key Features
+- **Real-time Anxiety Detection:** Tracks physiological data in real-time to identify abnormal stress levels.
+- **Parental Alerts:** Sends instant notifications to parents when anomalies suggest a potential stress or anxiety event.
+- **Customizable Reports:** Provides detailed reports on children’s stress-related metrics, such as sleep disturbances and time spent in vehicles.
+- **User-friendly Android Interface:** Designed for ease of use, the mobile app helps parents stay informed and manage their child's health proactively.
+- **Personalized Monitoring:** Adapts to each child’s unique physiological data, improving the accuracy of anomaly detection.
 
 ## Components
 - **Smartwatch Sensors**: Utilizes sensors such as heart rate monitors for real-time physiological data collection.
@@ -53,11 +55,20 @@ These instructions will give you a copy of the project up and running on
 your local machine for development and testing purposes. 
 
 ### 🧱 Prerequisites
+Smartwatch: Garmin wearables (or similar devices) for real-time data collection.
+Mobile Device: Android smartphone for running the mobile app.
+
 Requirements for the software and other tools to build, test and push 
 - [Example 1](https://www.example.com)
 - [Example 2](https://www.example.com)
 
 ### 🏗️ Installing
+Clone the repository: git clone https://github.com/zemani2/FinalProject.git
+Install dependencies: Run ./gradlew build in the Android Studio environment.
+Connect Firebase: Set up a Firebase project for real-time database management.
+Deploy the app: Install the APK on an Android device for testing.
+
+
 A step by step series of examples that tell you how to get a development environment running
 
 Say what the step will be
@@ -72,7 +83,11 @@ End with an example of getting some data out of the system or using it
 for a little demo
 
 ## 🧪 Testing
-Explain how to run tests for this project
+To test the anomaly detection model and app functionality:
+
+Simulate data inputs: Use Garmin devices to collect HRV and other physiological metrics.
+Trigger anomalies: Create scenarios with abnormal data patterns (e.g., disrupted sleep).
+Verify alerts: Check that the app sends alerts when significant stress indicators are detected.
 
 ### Sample Tests
 Explain what these tests test and why
@@ -80,15 +95,21 @@ Explain what these tests test and why
     Give an example
 
 ## 🚀 Deployment
-Add additional notes on how to deploy this on a live system
+For live deployment:
+Connect the app to live Garmin watch data.
+Monitor real-time feedback through the app.
+Deploy updates using Firebase for seamless updates to the backend and user interface.
 
 ## ⚙️ Built With
   - [Based on the amazing work of reserch group xxxx](https://www.example.com)
   - [Contributor Covenant](https://www.contributor-covenant.org/) - Used for the Code of Conduct
   - [Creative Commons](https://creativecommons.org/) - Used to choose the license
 
+  - Android Studio: For mobile app development.
+  - Firebase: For real-time data storage and user management.
+  - Garmin API: For collecting and integrating physiological data from smartwatches.
+  - Machine Learning Algorithms: Unsupervised learning models for anomaly detection.
+
 
 ## 🙏 Acknowledgments
-  - Hat tip to anyone whose code is used
-  - Inspiration
-  - etc
+  - Special thanks to Rhea Chowers for mentorship.
