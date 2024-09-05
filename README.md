@@ -1,7 +1,7 @@
 # 💡 AI-Enhanced Anomaly Detection for Children 
 
 <!-- cool project cover image -->
-![Project Cover Image](Apple-watch-HR-main-1-1024x614.jpg)
+![Project Cover Image](app/images/Apple-watch-HR-main-1-1024x614.jpg)
 
 <!-- table of content -->
 ## Table of Contents
@@ -70,7 +70,7 @@ To test the anomaly detection model and app functionality:
 - **Trigger anomalies:** Create scenarios with abnormal data patterns (e.g., disrupted sleep).
 - **Verify alerts:** Check that the app sends alerts when significant stress indicators are detected.
 
-![App Image](app_image.jpg)
+![App Image](app/images/app_image.jpg)
 
 ## 🚀 Deployment
 For live deployment:
