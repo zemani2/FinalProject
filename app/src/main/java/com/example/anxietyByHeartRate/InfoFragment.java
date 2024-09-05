@@ -28,24 +28,42 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * InfoFragment is responsible for displaying user information and a list of associated kids
+ * (for users of type "parent"). It retrieves user data from FirebaseFirestore and displays
+ * relevant details like first name, last name, and kids' details in a RecyclerView.
+ */
 public class InfoFragment extends Fragment {
 
+    // Adapter for displaying kids' data
     private KidsAdapter kidsAdapter;
+    // RecyclerView for the kids list
     private RecyclerView rvKids;
+    // Title TextView for the kids section
     private TextView tvKidsTitle;
+    // Progress bar to show loading state
     private ProgressBar progressBar;
 
+    // Email address of the parent user
     private String parentEmail;
 
+    // TextViews for displaying first name and last name of the user
     private TextView firstNameTextView, lastNameTextView;
 
+    // Firebase authentication and Firestore database instances
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    // Constructor for the fragment
     public InfoFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Factory method to create a new instance of InfoFragment.
+     *
+     * @return A new instance of InfoFragment.
+     */
     public static InfoFragment newInstance() {
         InfoFragment fragment = new InfoFragment();
         Bundle args = new Bundle();
@@ -58,24 +76,41 @@ public class InfoFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Updates the RecyclerView's adapter with the list of kids.
+     *
+     * @param kidsList A list of Kid objects to display.
+     */
     private void updateKidsAdapter(List<Kid> kidsList) {
         kidsAdapter.updateKidsList(kidsList);
         hideProgressBar();
     }
 
+    /**
+     * Shows the progress bar to indicate data loading.
+     */
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Hides the progress bar after data loading is complete.
+     */
     private void hideProgressBar() {
         progressBar.setVisibility(View.GONE);
     }
 
+    /**
+     * Loads the list of kids associated with a parent user from Firestore and updates
+     * the RecyclerView with the retrieved data.
+     *
+     * @param parentEmail The email address of the parent user.
+     */
     private void loadKids(String parentEmail) {
         db.collection("users")
                 .document(parentEmail)
                 .collection("kids")
-                .whereEqualTo("status", "accepted")
+                .whereEqualTo("status", "accepted") // Only fetch accepted kids
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -91,6 +126,7 @@ public class InfoFragment extends Fragment {
                                 }
                             }
 
+                            // Fetch kid details using their email
                             for (String kidEmail : kidEmails) {
                                 db.collection("users")
                                         .whereEqualTo("email", kidEmail)
@@ -108,6 +144,7 @@ public class InfoFragment extends Fragment {
                                                     }
                                                 }
 
+                                                // Update the adapter after loading the last kid
                                                 if (kidEmail.equals(kidEmails.get(kidEmails.size() - 1))) {
                                                     updateKidsAdapter(kidsList);
                                                 }
@@ -115,10 +152,10 @@ public class InfoFragment extends Fragment {
                                         });
                             }
 
+                            // If no kids are found, update the adapter with an empty list
                             if (kidEmails.isEmpty()) {
                                 updateKidsAdapter(kidsList);
                             }
-
                         } else {
                             Log.d("Firestore", "Error getting accepted kids: ", task.getException());
                             hideProgressBar();
@@ -127,6 +164,13 @@ public class InfoFragment extends Fragment {
                 });
     }
 
+    /**
+     * Updates the user information (first name, last name) and triggers the loading
+     * of associated kids if the user is a parent.
+     *
+     * @param view       The root view of the fragment.
+     * @param parentEmail The email address of the parent user.
+     */
     private void updateNameView(View view, String parentEmail) {
         db.collection("users").document(parentEmail)
                 .get()
@@ -155,12 +199,21 @@ public class InfoFragment extends Fragment {
                 });
     }
 
+    /**
+     * Inflates the layout for this fragment and initializes UI elements.
+     *
+     * @param inflater           LayoutInflater to inflate the layout.
+     * @param container          The parent container.
+     * @param savedInstanceState Saved instance state.
+     * @return The root view of the fragment.
+     */
     @SuppressLint("MissingInflatedId")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_info, container, false);
 
+        // Initialize UI elements
         rvKids = view.findViewById(R.id.rvKids);
         tvKidsTitle = view.findViewById(R.id.tvKidsTitle);
         progressBar = view.findViewById(R.id.progressBar);
@@ -172,12 +225,14 @@ public class InfoFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Get the current user and load their information
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             parentEmail = currentUser.getEmail();
             updateNameView(view, parentEmail);
         }
 
+        // Handle the edit button click event
         ImageButton editButton = view.findViewById(R.id.editButton);
         editButton.setOnClickListener(v -> {
             // Open EditFragment when edit button is clicked
@@ -191,6 +246,12 @@ public class InfoFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Updates the UI with new first and last name values.
+     *
+     * @param firstName The updated first name.
+     * @param lastName  The updated last name.
+     */
     public void updateData(String firstName, String lastName) {
         if (firstNameTextView != null) {
             firstNameTextView.setText(firstName);

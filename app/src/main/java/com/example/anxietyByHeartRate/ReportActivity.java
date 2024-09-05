@@ -35,6 +35,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * ReportActivity displays a dashboard for generating and viewing various reports for kids.
+ * It allows the user to select a kid, pick a date, and view stress, sleep, or map reports.
+ */
 public class ReportActivity extends AppCompatActivity {
 
     private ListView stressHoursListView;
@@ -56,6 +60,7 @@ public class ReportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
+        // Initialize Firebase Firestore and views
         kidNamesSpinner = findViewById(R.id.kidNamesSpinner);
         db = FirebaseFirestore.getInstance();
         selectedDaysLabel = findViewById(R.id.selectedDaysLabel);
@@ -64,18 +69,16 @@ public class ReportActivity extends AppCompatActivity {
         buttonStressReport = findViewById(R.id.buttonStressReport);
         buttonMapReport = findViewById(R.id.buttonMapReport);
         sharedPreferences = getPreferences(MODE_PRIVATE);
+
+        // Set up button click listeners
         datePickerButton.setOnClickListener(v -> showDatePickerDialog());
         buttonStressReport.setOnClickListener(v -> loadStressDataFragment());
         buttonMapReport.setOnClickListener(v -> loadMapDataFragment());
         buttonSleepReport.setOnClickListener(v -> loadSleepReportFragment());
         ImageButton backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        backButton.setOnClickListener(v -> onBackPressed());
 
+        // Initialize default values and load data
         setDefaultDate();
         loadKidNames();
         restoreFragmentState();
@@ -89,6 +92,10 @@ public class ReportActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+    /**
+     * Sets the default date to today's date and updates the fragments.
+     */
     private void setDefaultDate() {
         final Calendar calendar = Calendar.getInstance();
         String year = Integer.toString(calendar.get(Calendar.YEAR));
@@ -98,9 +105,11 @@ public class ReportActivity extends AppCompatActivity {
         selectedDate = year + "-" + month + "-" + day;
         datePickerButton.setText(selectedDate);
         updateFragmentsOnDateChanged(selectedDate);
-
     }
 
+    /**
+     * Shows a date picker dialog to select a date.
+     */
     private void showDatePickerDialog() {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -114,11 +123,11 @@ public class ReportActivity extends AppCompatActivity {
                     String dayStr = String.format("%02d", dayOfMonth);
                     selectedDate = year1 + "-" + monthStr + "-" + dayStr;
                     datePickerButton.setText(selectedDate);
-//                    restoreFragmentState();
                     updateFragmentsOnDateChanged(selectedDate);
-                    },
+                },
                 year, month, day);
-// Set the initial date to the last selected date if available
+
+        // Set the initial date to the last selected date if available
         if (selectedDate != null) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -133,28 +142,49 @@ public class ReportActivity extends AppCompatActivity {
             }
         }
 
-        datePickerDialog.show();    }
+        datePickerDialog.show();
+    }
 
+    /**
+     * Loads the StressReportFragment with the currently selected kid and date.
+     */
     private void loadStressDataFragment() {
         StressReportFragment fragment = StressReportFragment.newInstance(selectedKidEmail, selectedDate);
         replaceFragment(fragment, "stress_fragment");
     }
+
+    /**
+     * Loads the SleepReportFragment with the currently selected kid and date.
+     */
     private void loadSleepReportFragment() {
         SleepReportFragment fragment = SleepReportFragment.newInstance(selectedKidEmail, selectedDate);
         replaceFragment(fragment, "sleep_fragment");
     }
+
+    /**
+     * Loads the MapFragment with the currently selected date.
+     */
     private void loadMapDataFragment() {
         MapFragment mapFragment = MapFragment.newInstance(selectedDate);
         replaceFragment(mapFragment, "map_fragment");
     }
 
+    /**
+     * Replaces the current fragment with a new one and sets the button colors accordingly.
+     *
+     * @param fragment The new fragment to display.
+     * @param tag The tag of the new fragment.
+     */
     private void replaceFragment(Fragment fragment, String tag) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
         // Remove any existing fragment with the same tag
         Fragment existingFragment = getSupportFragmentManager().findFragmentByTag(tag);
         if (existingFragment != null) {
             transaction.remove(existingFragment);
         }
+
+        // Set button colors based on the selected fragment
         switch (tag){
             case "map_fragment":
                 buttonMapReport.setTextColor(Color.BLACK);
@@ -171,7 +201,6 @@ public class ReportActivity extends AppCompatActivity {
                 buttonMapReport.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
                 buttonStressReport.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
                 break;
-
         }
 
         transaction.replace(R.id.fragment_container, fragment, tag);
@@ -179,6 +208,9 @@ public class ReportActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    /**
+     * Restores the state of the fragment from SharedPreferences if available.
+     */
     private void restoreFragmentState() {
         String currentFragmentTag = sharedPreferences.getString(FRAGMENT_TAG_KEY, "");
         if (!currentFragmentTag.isEmpty()) {
@@ -189,6 +221,9 @@ public class ReportActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Loads the kid names and emails from Firestore and populates the Spinner.
+     */
     private void loadKidNames() {
         String currentUserEmail = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getEmail();
 
@@ -259,8 +294,12 @@ public class ReportActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Updates all fragments that implement OnDateChangedListener with the new date.
+     *
+     * @param selectedDate The new date.
+     */
     private void updateFragmentsOnDateChanged(String selectedDate) {
-        // Find all instances of StressReportFragment and MapFragment
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
         for (Fragment fragment : fragments) {
             if (fragment instanceof OnDateChangedListener) {
@@ -269,8 +308,12 @@ public class ReportActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Updates all fragments that implement OnKidSelectedListener with the new kid email.
+     *
+     * @param selectedKidEmail The new kid email.
+     */
     private void updateFragmentsOnKidSelected(String selectedKidEmail) {
-        // Find all instances of StressReportFragment
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
         for (Fragment fragment : fragments) {
             if (fragment instanceof OnKidSelectedListener) {

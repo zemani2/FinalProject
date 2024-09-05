@@ -23,7 +23,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ParentDashboardActivity is responsible for displaying the dashboard for parents.
+ * It shows the list of kids and pending requests for the currently authenticated user.
+ * It fetches data from Firestore and updates the UI accordingly.
+ */
 public class ParentDashboardActivity extends AppCompatActivity {
+
     private RecyclerView rvKids, rvRequests;
     private TextView tvKidsTitle, tvRequestsTitle;
     private FirebaseAuth mAuth;
@@ -38,18 +44,22 @@ public class ParentDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parent_dashboard);
 
+        // Initialize Firebase Auth and Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Find views
         rvKids = findViewById(R.id.rvKids);
         rvRequests = findViewById(R.id.rvRequests);
         tvKidsTitle = findViewById(R.id.tvKidsTitle);
         tvRequestsTitle = findViewById(R.id.tvRequestsTitle);
         progressBar = findViewById(R.id.progressBar);
 
+        // Set up RecyclerView
         rvKids.setLayoutManager(new LinearLayoutManager(this));
         rvRequests.setLayoutManager(new LinearLayoutManager(this));
 
+        // Get current user
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             parentEmail = currentUser.getEmail();
@@ -60,14 +70,23 @@ public class ParentDashboardActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Shows the progress bar to indicate loading.
+     */
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Hides the progress bar after loading is complete.
+     */
     private void hideProgressBar() {
         progressBar.setVisibility(View.GONE);
     }
 
+    /**
+     * Loads the list of kids from Firestore who have an "accepted" status.
+     */
     private void loadKids() {
         db.collection("users")
                 .document(parentEmail)
@@ -130,13 +149,20 @@ public class ParentDashboardActivity extends AppCompatActivity {
                 });
     }
 
-
+    /**
+     * Updates the KidsAdapter with the list of kids.
+     *
+     * @param kidsList List of Kid objects to be displayed.
+     */
     private void updateKidsAdapter(List<Kid> kidsList) {
         kidsAdapter = new KidsAdapter(kidsList);
         rvKids.setAdapter(kidsAdapter);
         hideProgressBar();
     }
 
+    /**
+     * Loads the list of pending requests from Firestore.
+     */
     private void loadRequests() {
         db.collection("users")
                 .document(parentEmail)
@@ -166,6 +192,11 @@ public class ParentDashboardActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Updates the RequestsAdapter with the list of requests.
+     *
+     * @param requestsList List of Request objects to be displayed.
+     */
     private void updateRequestsAdapter(List<Request> requestsList) {
         requestsAdapter = new RequestsAdapter(requestsList, db, kidsAdapter);
         rvRequests.setAdapter(requestsAdapter);

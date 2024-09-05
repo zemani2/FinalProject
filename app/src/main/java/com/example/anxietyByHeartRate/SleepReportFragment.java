@@ -20,12 +20,14 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class SleepReportFragment extends Fragment implements OnDateChangedListener, OnKidSelectedListener{
+/**
+ * A fragment that displays sleep report data for a selected kid on a selected date.
+ * This includes visualizing sleep quality and battery-like indicators for total sleep time.
+ */
+public class SleepReportFragment extends Fragment implements OnDateChangedListener, OnKidSelectedListener {
 
     private static final String ARG_SELECTED_KID_EMAIL = "selected_kid_email";
     private static final String ARG_SELECTED_DATE = "selected_date";
@@ -39,6 +41,14 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
     private ImageView batteryView;
     private TextView batteryTextView;
     private PieChart pieChartSleepQuality;
+
+    /**
+     * Creates a new instance of SleepReportFragment with the given parameters.
+     *
+     * @param selectedKidEmail The email of the selected kid.
+     * @param selectedDate     The selected date for the report.
+     * @return A new instance of SleepReportFragment.
+     */
     public static SleepReportFragment newInstance(String selectedKidEmail, String selectedDate) {
         SleepReportFragment fragment = new SleepReportFragment();
         Bundle args = new Bundle();
@@ -47,23 +57,30 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
         fragment.setArguments(args);
         return fragment;
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sleep_report, container, false);
+
         if (getArguments() != null) {
             selectedKidEmail = getArguments().getString(ARG_SELECTED_KID_EMAIL);
             selectedDate = getArguments().getString(ARG_SELECTED_DATE);
         }
+
         db = FirebaseFirestore.getInstance();
-        // Get the PieChart views
+        // Initialize UI elements
         batteryView = view.findViewById(R.id.batteryView);
         batteryTextView = view.findViewById(R.id.batteryTextView);
         pieChartSleepQuality = view.findViewById(R.id.pieChartSleepQuality);
-        loadSleepData();
 
+        loadSleepData();
         return view;
     }
+
+    /**
+     * Loads sleep data from Firestore and updates the UI.
+     */
     private void loadSleepData() {
         db.collection("users")
                 .document(selectedKidEmail)
@@ -71,8 +88,6 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        List<String> stressHours = new ArrayList<>();
-                        SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                         for (DocumentSnapshot document : task.getResult()) {
                             String date = document.getString("timestamp");
                             if (date.equals(selectedDate)) {
@@ -81,55 +96,41 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
                                 remSleepSeconds = document.getLong("rem_sleep_seconds");
                                 awakeSleepSeconds = document.getLong("awake_sleep_seconds");
 
-                                updateBatteryView(deepSleepSeconds+lightSleepSeconds+remSleepSeconds);
-
-
-                                // Setup sleep quality chart
+                                updateBatteryView(deepSleepSeconds + lightSleepSeconds + remSleepSeconds);
                                 setupSleepQualityChart(pieChartSleepQuality);
                             }
                         }
                     } else {
-                        Log.d("Firestore", "Error getting stressData documents: ", task.getException());
+                        Log.d("Firestore", "Error getting sleepData documents: ", task.getException());
                     }
                 });
     }
+
+    /**
+     * Updates the battery-like indicator based on the total sleep time.
+     *
+     * @param totalSleepTime The total amount of sleep time in seconds.
+     */
     private void updateBatteryView(float totalSleepTime) {
         int hours = (int) (totalSleepTime / 3600);
-        int minuets = (int) (totalSleepTime % 3600 / 60);
+        int minutes = (int) (totalSleepTime % 3600 / 60);
         batteryView.setVisibility(View.VISIBLE);
-        batteryTextView.setText("Total amount of sleep: " + hours +":"+minuets+" hours");
-        if (totalSleepTime < 21600) { // 7 hours (low)
+        batteryTextView.setText("Total amount of sleep: " + hours + ":" + minutes + " hours");
+
+        if (totalSleepTime < 21600) { // 6 hours (low)
             batteryView.setImageResource(R.drawable.ic_low_battery);
-        } else if (totalSleepTime < 25200) {
+        } else if (totalSleepTime < 25200) { // 7 hours (medium)
             batteryView.setImageResource(R.drawable.ic_med_battery);
         } else {
             batteryView.setImageResource(R.drawable.ic_high_battery);
         }
     }
-    private void setupTotalSleepChart(PieChart pieChart) {
-        float totalSleepTime = deepSleepSeconds + lightSleepSeconds + remSleepSeconds + awakeSleepSeconds;
 
-        List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(deepSleepSeconds, "Deep Sleep"));
-        entries.add(new PieEntry(lightSleepSeconds, "Light Sleep"));
-        entries.add(new PieEntry(remSleepSeconds, "REM Sleep"));
-        entries.add(new PieEntry(awakeSleepSeconds, "Awake"));
-
-        PieDataSet dataSet = new PieDataSet(entries, "Total Sleep Time");
-        dataSet.setColors(new int[]{Color.parseColor("#1f77b4"),
-                Color.parseColor("#2ca02c"),
-                Color.parseColor("#ff7f0e"),
-                Color.parseColor("#9467bd")});
-        PieData pieData = new PieData(dataSet);
-        dataSet.setDrawValues(false);
-        pieChart.setEntryLabelTextSize(0);
-        pieChart.setData(pieData);
-        pieChart.setUsePercentValues(true);
-        pieChart.setDrawHoleEnabled(true);
-
-        pieChart.invalidate(); // refresh
-    }
-
+    /**
+     * Sets up the sleep quality chart using the provided PieChart view.
+     *
+     * @param pieChart The PieChart view to be set up.
+     */
     private void setupSleepQualityChart(PieChart pieChart) {
         List<PieEntry> entries = new ArrayList<>();
         entries.add(new PieEntry(deepSleepSeconds, "Deep Sleep"));
@@ -143,13 +144,13 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
                 Color.parseColor("#ff7f0e"),
                 Color.parseColor("#9467bd")});
         PieData pieData = new PieData(dataSet);
+
         pieChart.setCenterText("Sleep Quality");
         pieChart.setEntryLabelTextSize(0);
         pieChart.setData(pieData);
         pieChart.setUsePercentValues(true);
         pieChart.setDrawHoleEnabled(true);
         pieChart.setHoleRadius(40f);
-        pieChart.setCenterText("Sleep Quality");
         pieChart.invalidate(); // refresh
     }
 
@@ -158,27 +159,31 @@ public class SleepReportFragment extends Fragment implements OnDateChangedListen
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Handles date change events and refreshes the data accordingly.
+     *
+     * @param selectedDate The new selected date for the report.
+     */
     @Override
     public void onDateChanged(String selectedDate) {
-        // Update fragment view based on new selected kid
         this.selectedDate = selectedDate;
-        // Call a method to refresh your UI with new selectedKidEmail
-
         batteryView.setVisibility(View.GONE);
         batteryTextView.setText("No data to display");
         pieChartSleepQuality.clear();
         loadSleepData();
     }
 
+    /**
+     * Handles kid selection events and refreshes the data accordingly.
+     *
+     * @param selectedKidEmail The email of the newly selected kid.
+     */
     @Override
     public void onKidSelected(String selectedKidEmail) {
-        // Update fragment view based on new selected kid
         this.selectedKidEmail = selectedKidEmail;
         batteryView.setVisibility(View.GONE);
         batteryTextView.setText("No data to display");
         pieChartSleepQuality.clear();
-        // Call a method to refresh your UI with new selectedKidEmail
         loadSleepData();
-
     }
 }

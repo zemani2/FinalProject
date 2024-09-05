@@ -25,22 +25,53 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+/**
+ * HomePageActivity is the main screen displayed after the user signs in.
+ * It presents various options such as viewing user information, reports, and (if applicable) accessing a parent dashboard.
+ * The activity also handles user authentication, retrieves data from Firebase Firestore, and manages user-specific features.
+ * Additionally, it requests location permissions and starts a location service after user authentication.
+ *
+ * Key Components:
+ * - FirebaseAuth (mAuth): Handles authentication, allowing access to the current user's information.
+ * - FirebaseFirestore (db): Firestore database instance used to retrieve user data like the first name and user type.
+ * - ProgressBar (loadingIndicator): Indicates loading when retrieving data from Firestore.
+ * - SharedPreferences (prefs): Used to cache user data (e.g., first name and user type) for faster access in future sessions.
+ *
+ * Main Features:
+ * - Fetches user data (first name, user type) from Firestore on sign-in and updates the UI accordingly.
+ * - Provides buttons for navigation to the user's information page, reports, and parent dashboard (if applicable).
+ * - Manages sign-out functionality and redirects to the login screen upon logout.
+ * - Starts a location service after authentication and permission requests.
+ *
+ * How it works:
+ * - On creation, the activity fetches the user's data from Firestore and populates the UI, displaying their first name and enabling relevant features based on their user type (e.g., showing the parent dashboard button for parents).
+ * - The activity also handles location permissions and starts a foreground location service.
+ * - Listeners are set for navigation buttons to handle moving to other activities like ReportActivity and UserInfoActivity.
+ * - A custom back button press behavior is implemented using OnBackPressedCallback.
+ */
 public class HomePageActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
-    private ProgressBar loadingIndicator;
+    private FirebaseAuth mAuth; // Firebase authentication instance
+    private FirebaseFirestore db; // Firestore database instance
+    private ProgressBar loadingIndicator; // Loading indicator for async operations
 
+    /**
+     * Called when the activity is first created.
+     * It sets up UI elements and initializes Firebase instances for authentication and Firestore.
+     * Also handles fetching and displaying user data, starting the location service, and managing navigation.
+     *
+     * @param savedInstanceState The saved state of the activity if it was previously paused or stopped.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance(); // Initialize Firebase authentication
+        db = FirebaseFirestore.getInstance(); // Initialize Firestore instance
 
+        // UI elements
         TextView usernameTextView = findViewById(R.id.usernameTextView);
         Button myInfoButton = findViewById(R.id.myInfoButton);
         Button reportsButton = findViewById(R.id.reportsButton);
@@ -48,27 +79,30 @@ public class HomePageActivity extends AppCompatActivity {
         ImageButton logoutButton = findViewById(R.id.logoutButton);
         loadingIndicator = findViewById(R.id.loadingIndicator);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this); // SharedPreferences to store cached data
 
+        // Retrieve cached first name and user type if available
         String cachedFirstName = prefs.getString("firstName", null);
         String cachedUserType = prefs.getString("userType", null);
 
+        // Display cached first name in the usernameTextView if available
         if (cachedFirstName != null) {
             usernameTextView.setText("Welcome, " + cachedFirstName + "!");
         }
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser = mAuth.getCurrentUser(); // Get the current logged-in user
         if (currentUser != null) {
             String userEmail = currentUser.getEmail();
-            loadingIndicator.setVisibility(View.VISIBLE); // Show loading indicator
+            loadingIndicator.setVisibility(View.VISIBLE); // Show loading indicator while fetching data
 
+            // Fetch user data from Firestore
             db.collection("users")
                     .document(userEmail)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            loadingIndicator.setVisibility(View.GONE); // Hide loading indicator
+                            loadingIndicator.setVisibility(View.GONE); // Hide loading indicator once data is fetched
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
@@ -76,15 +110,12 @@ public class HomePageActivity extends AppCompatActivity {
                                     String userType = document.getString("userType");
                                     if (firstName != null) {
                                         usernameTextView.setText("Welcome, " + firstName + "!");
-                                        prefs.edit().putString("firstName", firstName).apply();
-                                        startLocationService(); // Start location service after sign-in
-
-                                    } else {
-                                        Log.d("HomePageActivity", "No first name found for user with email: " + userEmail);
+                                        prefs.edit().putString("firstName", firstName).apply(); // Cache first name
+                                        startLocationService(); // Start location service after successful sign-in
                                     }
                                     if ("parent".equals(userType)) {
-                                        myKidsButton.setVisibility(View.VISIBLE);
-                                        prefs.edit().putString("userType", userType).apply();
+                                        myKidsButton.setVisibility(View.VISIBLE); // Show "My Kids" button if user is a parent
+                                        prefs.edit().putString("userType", userType).apply(); // Cache user type
                                     }
                                 } else {
                                     Log.d("HomePageActivity", "No such document found for user with email: " + userEmail);
@@ -98,7 +129,7 @@ public class HomePageActivity extends AppCompatActivity {
             Log.d("HomePageActivity", "No user logged in.");
         }
 
-        // Button click listeners
+        // Set up button listeners for navigation
         reportsButton.setOnClickListener(v -> {
             Intent reportIntent = new Intent(HomePageActivity.this, ReportActivity.class);
             startActivity(reportIntent);
@@ -114,31 +145,31 @@ public class HomePageActivity extends AppCompatActivity {
             startActivity(myKidsIntent);
         });
 
+        // Set up logout button listener
         logoutButton.setOnClickListener(v -> logoutUser());
-
 
         // Handle back button press using OnBackPressedCallback
         OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
             @Override
             public void handleOnBackPressed() {
-                // Handle back button press here
-                // For example, prevent default behavior:
-                // super.handleOnBackPressed();
-
-                // Or implement custom behavior
-                // For example, show a dialog or take specific action
+                // Custom back button behavior can be implemented here
             }
         };
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        // Request location permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
+
         // Register the callback
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
+    /**
+     * Signs out the current user and redirects to the login screen.
+     */
     private void logoutUser() {
         mAuth.signOut();
         Intent loginIntent = new Intent(HomePageActivity.this, StartActivity.class);
@@ -146,8 +177,12 @@ public class HomePageActivity extends AppCompatActivity {
         startActivity(loginIntent);
         finish();
     }
+
+    /**
+     * Starts the location service to track user location in the background.
+     */
     private void startLocationService() {
         Intent serviceIntent = new Intent(this, LocationService.class);
-        ContextCompat.startForegroundService(this, serviceIntent);
+        ContextCompat.startForegroundService(this, serviceIntent); // Start location service in the foreground
     }
 }

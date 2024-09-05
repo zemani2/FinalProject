@@ -23,6 +23,10 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+/**
+ * MapFragment displays a map with location markers based on user data fetched from Firestore.
+ * It handles user interaction with the map and refreshes the view when the selected date changes.
+ */
 public class MapFragment extends Fragment implements OnDateChangedListener {
 
     private MapView mapView;
@@ -30,9 +34,19 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
     private static final String ARG_SELECTED_DATE = "selected_date";
     private String selectedDate;
     private FirebaseUser currentUser;
+
+    /**
+     * Default constructor for MapFragment.
+     */
     public MapFragment() {
         // Required empty public constructor
     }
+
+    /**
+     * Called when the fragment is first created. Retrieves the selected date from the arguments.
+     *
+     * @param savedInstanceState The saved instance state from a previous instance, if any.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +54,13 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
             selectedDate = getArguments().getString(ARG_SELECTED_DATE);
         }
     }
+
+    /**
+     * Static factory method to create a new instance of MapFragment with a selected date.
+     *
+     * @param selectedDate The selected date for filtering location data.
+     * @return A new instance of MapFragment.
+     */
     public static MapFragment newInstance(String selectedDate) {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
@@ -47,20 +68,33 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
         fragment.setArguments(args);
         return fragment;
     }
+
+    /**
+     * Handles the date change event. Refreshes the UI with the new selected date.
+     *
+     * @param selectedDate The new selected date.
+     */
     @Override
     public void onDateChanged(String selectedDate) {
         // Update fragment view based on new selected date
         this.selectedDate = selectedDate;
-        // Call a method to refresh your UI with new selectedDate
         refreshUI(currentUser);
     }
 
+    /**
+     * Inflates the fragment's view and initializes the map and Firestore instance.
+     *
+     * @param inflater           The LayoutInflater used to inflate the view.
+     * @param container          The ViewGroup that contains the fragment's UI.
+     * @param savedInstanceState The saved instance state from a previous instance, if any.
+     * @return The inflated view for the fragment's UI.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = view.findViewById(R.id.mapView);
-        mapView.setMultiTouchControls(true);
-        mapView.setBuiltInZoomControls(true);
+        mapView.setMultiTouchControls(true); // Enable touch gestures
+        mapView.setBuiltInZoomControls(true); // Enable zoom controls
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -75,7 +109,14 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
         return view;
     }
 
+    /**
+     * Refreshes the map UI by fetching location data from Firestore and adding markers to the map.
+     *
+     * @param currentUser The currently authenticated Firebase user.
+     */
     private void refreshUI(FirebaseUser currentUser) {
+        mapView.getOverlays().clear(); // Clear existing markers
+        mapView.invalidate(); // Redraw the map
         if (currentUser != null) {
             // Fetch the location data from Firestore
             db.collection("users").document("kid1@gmail.com").collection("locationsData")
@@ -83,31 +124,29 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             IMapController mapController = mapView.getController();
-                            mapController.setCenter(new GeoPoint(31.778263, 35.197334));
-                            mapController.setZoom(11);
+                            mapController.setCenter(new GeoPoint(31.778263, 35.197334)); // Set default center
+                            mapController.setZoom(11); // Set default zoom level
                             boolean firstLocation = true;
                             for (DocumentSnapshot document : task.getResult()) {
                                 if (document.exists()) {
-                                    long locationLatE7 = document.getLong("location_latitudee7");
-                                    long locationLngE7 = document.getLong("location_longitudee7");
-                                    String locationName = document.getString("location_name");
-                                    String timeStamp = document.getString("duration_starttimestamp");
-                                    String[] parts = timeStamp.split("T");
+                                    Long locationLatE7 = document.getLong("location_latitudee7");
+                                    Long locationLngE7 = document.getLong("location_longitudee7");
+                                    if (locationLatE7 == null || locationLngE7 == null) continue;
 
-                                    // Extract the date and time
-                                    String date = parts[0];
-//                                    date = date.substring(0,4) + date.substring(7) + date.substring(4,7);
-                                    String time = parts[1].substring(0, 5); // This will give you the hour and minute (HH:mm)
+                                    String locationName = document.getString("location_name");
+                                    String timeStamp = document.getString("timestamp");
+                                    String date = timeStamp;
+
+                                    // Add a marker if the date matches the selected date
                                     if (date.equals(selectedDate)) {
                                         GeoPoint location = new GeoPoint(locationLatE7 / 1e7, locationLngE7 / 1e7);
-
-                                        // Add a marker for each location
                                         Marker marker = new Marker(mapView);
                                         marker.setPosition(location);
                                         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                                        marker.setTitle(time + "\n" + locationName);
+                                        marker.setTitle(date + "\n" + locationName);
                                         mapView.getOverlays().add(marker);
 
+                                        // Set the first location as the map's center
                                         if (firstLocation) {
                                             mapController.setCenter(location);
                                             firstLocation = false;
@@ -122,18 +161,27 @@ public class MapFragment extends Fragment implements OnDateChangedListener {
         }
     }
 
+    /**
+     * Lifecycle method to handle the fragment's resume state. Resumes the map view.
+     */
     @Override
     public void onResume() {
         super.onResume();
         mapView.onResume();
     }
 
+    /**
+     * Lifecycle method to handle the fragment's pause state. Pauses the map view.
+     */
     @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
     }
 
+    /**
+     * Lifecycle method to handle the fragment's detach state. Detaches the map view.
+     */
     @Override
     public void onDetach() {
         super.onDetach();

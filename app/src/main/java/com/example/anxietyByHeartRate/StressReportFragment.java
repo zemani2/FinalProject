@@ -32,6 +32,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Fragment that displays a bar chart showing the frequency of stress events by hour of the day.
+ * The data is fetched from Firestore based on the selected kid and date.
+ */
 public class StressReportFragment extends Fragment implements OnDateChangedListener, OnKidSelectedListener {
 
     private static final String ARG_SELECTED_KID_EMAIL = "selected_kid_email";
@@ -48,6 +52,13 @@ public class StressReportFragment extends Fragment implements OnDateChangedListe
         // Required empty public constructor
     }
 
+    /**
+     * Creates a new instance of StressReportFragment with the provided parameters.
+     *
+     * @param selectedKidEmail The email of the selected kid.
+     * @param selectedDate     The selected date for the report.
+     * @return A new instance of StressReportFragment.
+     */
     public static StressReportFragment newInstance(String selectedKidEmail, String selectedDate) {
         StressReportFragment fragment = new StressReportFragment();
         Bundle args = new Bundle();
@@ -84,7 +95,6 @@ public class StressReportFragment extends Fragment implements OnDateChangedListe
     public void onDateChanged(String selectedDate) {
         // Update fragment view based on new selected date
         this.selectedDate = selectedDate;
-        // Call a method to refresh your UI with new selectedDate
         loadStressEvents();
     }
 
@@ -92,10 +102,12 @@ public class StressReportFragment extends Fragment implements OnDateChangedListe
     public void onKidSelected(String selectedKidEmail) {
         // Update fragment view based on new selected kid
         this.selectedKidEmail = selectedKidEmail;
-        // Call a method to refresh your UI with new selectedKidEmail
         loadStressEvents();
     }
 
+    /**
+     * Loads stress event data from Firestore and updates the chart and UI accordingly.
+     */
     private void loadStressEvents() {
         db.collection("users")
                 .document(selectedKidEmail)
@@ -104,15 +116,16 @@ public class StressReportFragment extends Fragment implements OnDateChangedListe
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<Long> stressEventTimes = new ArrayList<>();
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
                         for (DocumentSnapshot document : task.getResult()) {
                             Timestamp timestamp = document.getTimestamp("timestamp");
-                            Date date = timestamp.toDate();
-                            String formattedDate = sdf.format(date);
-                            if (timestamp != null && formattedDate.equals(selectedDate)) {
-                                stressEventTimes.add(date.getTime());
+                            if (timestamp != null) {
+                                Date date = timestamp.toDate();
+                                String formattedDate = sdf.format(date);
+                                if (formattedDate.equals(selectedDate)) {
+                                    stressEventTimes.add(date.getTime());
+                                }
                             }
                         }
 
@@ -130,33 +143,26 @@ public class StressReportFragment extends Fragment implements OnDateChangedListe
                 });
     }
 
+    /**
+     * Sets up the bar chart to display stress events.
+     *
+     * @param stressEventTimes A list of timestamps representing stress events.
+     */
     private void setupStressEventsChart(List<Long> stressEventTimes) {
         Collections.sort(stressEventTimes);
 
         List<BarEntry> entries = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-        // Initialize an array to track stress events per hour
+        // Track stress events per hour
         Map<Integer, Integer> stressEventsPerHour = new HashMap<>();
-//        int[] stressEventsPerHour = new int[25]; // Include 25 slots for 0 to 24 (24 hours)
         for (Long stressEventTime : stressEventTimes) {
             Date date = new Date(stressEventTime);
             int hour = date.getHours();
-            if (stressEventsPerHour.containsKey(hour)){
-                int val = stressEventsPerHour.get(hour);
-                stressEventsPerHour.put(hour, val + 1);
-            }else {
-                stressEventsPerHour.put(hour, 1);
-            }
-        }
-        if (!stressEventsPerHour.containsKey(0)){
-            stressEventsPerHour.put(0, 0);
-        }
-        if (!stressEventsPerHour.containsKey(24)){
-            stressEventsPerHour.put(24, 0);
+            stressEventsPerHour.put(hour, stressEventsPerHour.getOrDefault(hour, 0) + 1);
         }
 
-        // Stress events during the day
+        // Add stress events data to the chart entries
         for (Map.Entry<Integer, Integer> entry : stressEventsPerHour.entrySet()) {
             entries.add(new BarEntry(entry.getKey(), entry.getValue()));
         }
@@ -180,10 +186,6 @@ public class StressReportFragment extends Fragment implements OnDateChangedListe
         xAxis.setLabelCount(12); // Number of labels to show
 
         stressEventsChart.setFitBars(true);
-        stressEventsChart.invalidate();
+        stressEventsChart.invalidate(); // Refresh the chart
     }
-
-
-
-
 }

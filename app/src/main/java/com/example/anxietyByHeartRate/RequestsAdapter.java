@@ -17,11 +17,21 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
+/**
+ * Adapter class for displaying and handling request items in a RecyclerView.
+ */
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.RequestViewHolder> {
     private List<Request> requestsList;
     private FirebaseFirestore db;
     private KidsAdapter kidsAdapter; // Reference to KidsAdapter for updating
 
+    /**
+     * Constructs a RequestsAdapter with the given parameters.
+     *
+     * @param requestsList List of requests to be displayed.
+     * @param db           FirebaseFirestore instance for database operations.
+     * @param kidsAdapter  KidsAdapter for updating the list of kids.
+     */
     public RequestsAdapter(List<Request> requestsList, FirebaseFirestore db, KidsAdapter kidsAdapter) {
         this.requestsList = requestsList;
         this.db = db;
@@ -51,6 +61,12 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.btnDecline.setOnClickListener(v -> declineRequest(request, holder));
     }
 
+    /**
+     * Handles the acceptance of a request and updates the Firestore database.
+     *
+     * @param request The request to be accepted.
+     * @param holder  The ViewHolder for the request item.
+     */
     private void acceptRequest(Request request, RequestViewHolder holder) {
         // Show progress bar while performing database operation
         holder.progressBar.setVisibility(View.VISIBLE);
@@ -125,6 +141,12 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
                 });
     }
 
+    /**
+     * Handles the decline of a request and updates the Firestore database.
+     *
+     * @param request The request to be declined.
+     * @param holder  The ViewHolder for the request item.
+     */
     private void declineRequest(Request request, RequestViewHolder holder) {
         // Show progress bar while performing database operation
         holder.progressBar.setVisibility(View.VISIBLE);
@@ -195,6 +217,11 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
                 });
     }
 
+    /**
+     * Adds a new kid to the KidsAdapter based on the request information.
+     *
+     * @param request The request containing the kid's email.
+     */
     private void addKidToAdapter(Request request) {
         Kid newKid = new Kid();
         newKid.setEmail(request.getKidEmail());
@@ -232,11 +259,19 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         return requestsList.size();
     }
 
+    /**
+     * ViewHolder class for request items in the RecyclerView.
+     */
     static class RequestViewHolder extends RecyclerView.ViewHolder {
         TextView tvKidEmail, tvRequestStatus;
         ImageButton btnAccept, btnDecline;
         ProgressBar progressBar;
 
+        /**
+         * Constructs a RequestViewHolder with the given view.
+         *
+         * @param itemView The view associated with the ViewHolder.
+         */
         RequestViewHolder(View itemView) {
             super(itemView);
             tvKidEmail = itemView.findViewById(R.id.tvKidEmail);

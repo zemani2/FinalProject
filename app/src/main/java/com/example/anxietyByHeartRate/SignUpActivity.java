@@ -28,6 +28,9 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Activity for user sign-up functionality, handling user registration and role assignment.
+ */
 public class SignUpActivity extends AppCompatActivity {
     EditText email, password, repassword, parentEmail;
     Button signup, signin;
@@ -42,8 +45,12 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        // Initialize Firebase Authentication and Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        // Initialize UI elements
         email = findViewById(R.id.etEmail);
         password = findViewById(R.id.etPassword);
         repassword = findViewById(R.id.etRePassword);
@@ -54,6 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
         radioGroup = findViewById(R.id.radioGroupRole);
         parentEmail = findViewById(R.id.etParentEmail);
 
+        // Set visibility of parentEmail field based on selected role
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbKid) {
                 parentEmail.setVisibility(View.VISIBLE);
@@ -62,52 +70,60 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-        signin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-            }
+        // Handle sign-in button click
+        signin.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
         });
 
-        signup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String emailText = email.getText().toString();
-                String pass = password.getText().toString();
-                String repass = repassword.getText().toString();
-                String firstName = ((EditText) findViewById(R.id.etFirstName)).getText().toString();
-                String lastName = ((EditText) findViewById(R.id.etLastName)).getText().toString();
-                int selectedId = radioGroup.getCheckedRadioButtonId();
-                String userType;
-                String parentEmailText = parentEmail.getText().toString();
+        // Handle sign-up button click
+        signup.setOnClickListener(v -> {
+            String emailText = email.getText().toString();
+            String pass = password.getText().toString();
+            String repass = repassword.getText().toString();
+            String firstName = ((EditText) findViewById(R.id.etFirstName)).getText().toString();
+            String lastName = ((EditText) findViewById(R.id.etLastName)).getText().toString();
+            int selectedId = radioGroup.getCheckedRadioButtonId();
+            String userType;
+            String parentEmailText = parentEmail.getText().toString();
 
-                if (selectedId == parent.getId()) {
-                    userType = "parent";
-                } else if (selectedId == kid.getId()) {
-                    userType = "kid";
-                } else {
-                    userType = ""; // No selection made
-                }
+            // Determine user type based on selected role
+            if (selectedId == parent.getId()) {
+                userType = "parent";
+            } else if (selectedId == kid.getId()) {
+                userType = "kid";
+            } else {
+                userType = ""; // No selection made
+            }
 
-                if (emailText.equals("") || pass.equals("") || repass.equals("") ||
-                        (userType.equals("kid") && parentEmailText.equals(""))) {
-                    Toast.makeText(SignUpActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (pass.equals(repass)) {
-                        if (userType.equals("kid")) {
-                            checkParentEmailAndCreateAccount(parentEmailText, emailText, pass, firstName, lastName, userType);
-                        } else {
-                            createAccount(emailText, pass, firstName, lastName, userType);
-                        }
+            // Validate input fields
+            if (emailText.isEmpty() || pass.isEmpty() || repass.isEmpty() ||
+                    (userType.equals("kid") && parentEmailText.isEmpty())) {
+                Toast.makeText(SignUpActivity.this, "Please enter all the fields", Toast.LENGTH_SHORT).show();
+            } else {
+                if (pass.equals(repass)) {
+                    if (userType.equals("kid")) {
+                        checkParentEmailAndCreateAccount(parentEmailText, emailText, pass, firstName, lastName, userType);
                     } else {
-                        Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                        createAccount(emailText, pass, firstName, lastName, userType);
                     }
+                } else {
+                    Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
+    /**
+     * Checks if the parent email exists in Firestore and proceeds to create an account if found.
+     *
+     * @param parentEmailText The email of the parent.
+     * @param emailText       The email of the kid.
+     * @param pass            The password for the new account.
+     * @param firstName       The first name of the user.
+     * @param lastName        The last name of the user.
+     * @param userType        The type of user (parent or kid).
+     */
     private void checkParentEmailAndCreateAccount(String parentEmailText, String emailText, String pass, String firstName, String lastName, String userType) {
         db.collection("users").whereEqualTo("email", parentEmailText).get()
                 .addOnCompleteListener(task -> {
@@ -130,8 +146,14 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Sends a request to the parent to add the kid to their list of children.
+     *
+     * @param parentEmail The email of the parent.
+     * @param kidEmail    The email of the kid.
+     */
     private void sendParentRequest(String parentEmail, String kidEmail) {
-         db.collection("users")
+        db.collection("users")
                 .whereEqualTo("email", parentEmail)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -166,6 +188,15 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Creates a new user account with the provided details.
+     *
+     * @param emailText  The email address for the new account.
+     * @param pass       The password for the new account.
+     * @param firstName  The first name of the user.
+     * @param lastName   The last name of the user.
+     * @param userType   The type of user (parent or kid).
+     */
     private void createAccount(String emailText, String pass, String firstName, String lastName, String userType) {
         mAuth.createUserWithEmailAndPassword(emailText, pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -189,6 +220,14 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Saves the user data to Firestore and SharedPreferences.
+     *
+     * @param email      The email address of the user.
+     * @param firstName  The first name of the user.
+     * @param lastName   The last name of the user.
+     * @param userType   The type of user (parent or kid).
+     */
     private void saveUserData(String email, String firstName, String lastName, String userType) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("email", email);
