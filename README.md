@@ -55,18 +55,25 @@ These instructions will give you a copy of the project up and running on
 your local machine for development and testing purposes. 
 
 ### 🧱 Prerequisites
-Smartwatch: Garmin wearables (or similar devices) for real-time data collection.
-Mobile Device: Android smartphone for running the mobile app.
+- **Smartwatch:** Garmin wearables (or similar devices) for real-time data collection.
+- **Mobile Device:** Android smartphone for running the mobile app.
 
 Requirements for the software and other tools to build, test and push 
 - [Example 1](https://www.example.com)
 - [Example 2](https://www.example.com)
 
 ### 🏗️ Installing
-Clone the repository: git clone https://github.com/zemani2/FinalProject.git
-Install dependencies: Run ./gradlew build in the Android Studio environment.
-Connect Firebase: Set up a Firebase project for real-time database management.
-Deploy the app: Install the APK on an Android device for testing.
+Clone the repository: 
+
+    git clone https://github.com/zemani2/FinalProject.git
+    
+Install dependencies: 
+
+    Run ./gradlew build in the Android Studio environment.
+
+Start the App:
+
+    ./FinalProject/app/src/main/java/com/example/anxietyByHeartRate/StartActivity.java
 
 
 A step by step series of examples that tell you how to get a development environment running
@@ -105,10 +112,10 @@ Deploy updates using Firebase for seamless updates to the backend and user inter
   - [Contributor Covenant](https://www.contributor-covenant.org/) - Used for the Code of Conduct
   - [Creative Commons](https://creativecommons.org/) - Used to choose the license
 
-  - Android Studio: For mobile app development.
-  - Firebase: For real-time data storage and user management.
-  - Garmin API: For collecting and integrating physiological data from smartwatches.
-  - Machine Learning Algorithms: Unsupervised learning models for anomaly detection.
+  - **Android Studio:** For mobile app development.
+  - **Firebase:** For real-time data storage and user management.
+  - **Garmin API:** For collecting and integrating physiological data from smartwatches.
+  - **Machine Learning Algorithms:** Unsupervised learning models for anomaly detection.
 
 
 ## 🙏 Acknowledgments
