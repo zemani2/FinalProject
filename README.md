@@ -1,4 +1,4 @@
-# 💡 AI-Enhanced Stress Detection for Children 
+# 💡 AI-Enhanced Anomaly Detection for Children 
 
 <!-- cool project cover image -->
 ![Project Cover Image](Apple-watch-HR-main-1-1024x614.jpg)
